@@ -83,6 +83,9 @@
         "codecvt": "cpp",
         "forward_list": "cpp",
         "valarray": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "condition_variable": "cpp",
+        "future": "cpp",
+        "mutex": "cpp"
     },
 }

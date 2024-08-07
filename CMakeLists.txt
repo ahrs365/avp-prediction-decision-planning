@@ -41,7 +41,7 @@ set(INCLUDE_PATH
 file(GLOB_RECURSE SRC_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 # aux_source_directory(src SRC_FILES)
 # 添加一个可执行目标到项目中，并指定构建这个目标需要的源文件。
-add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/test/main.cpp ${SRC_FILES})
+add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/test/main1.cpp ${SRC_FILES})
 
 # 为可执行目标设置私有包含目录，这意味着这些目录只对这个目标可见。
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_PATH})

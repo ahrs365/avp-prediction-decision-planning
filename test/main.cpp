@@ -9,17 +9,13 @@ namespace py = pybind11;
 
 int main() {
   Dataset dataset;
-  dataset.load_from_python(
-      "dataset", "get_dataset_data",
-      "/home/ahrs/workspace/nday/bspline_lattice_planner/data/"
-      "DJI_0012");
+  dataset.load_from_python("dataset", "get_dataset_data", "./data/DJI_0012");
 
   // 示例: 打印一些加载的数据
-  // for (const auto& [token, frame] : dataset.frames) {
-  //   std::cout << "Frame token: " << token << ", timestamp: " <<
-  //   frame.timestamp
-  //             << std::endl;
-  // }
+  for (const auto& [token, frame] : dataset.frames) {
+    std::cout << "Frame token: " << token << ", timestamp: " << frame.timestamp
+              << std::endl;
+  }
 
   // Get the first scene
   auto scenes = dataset.list_scenes();
@@ -27,7 +23,6 @@ int main() {
     std::cerr << "No scenes found in the dataset" << std::endl;
     return -1;
   }
-
   auto scene = dataset.get("scene", scenes[0]);
 
   // Get future frames
