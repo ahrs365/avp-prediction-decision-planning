@@ -1,5 +1,9 @@
+#include <FL/Fl.H>
+
+#include <chrono>  // 包含 <chrono> 头文件
 #include <iostream>
 #include <limits>
+#include <thread>  // 包含 <thread> 头文件
 
 #include "matplotlibcpp.h"
 #include "park_data_reader/park_simulation.h"
@@ -45,7 +49,7 @@ void ParkSimulation::findStartFrame() {
   }
 }
 
-void ParkSimulation::run() {
+void ParkSimulation::run(DrawingArea* drawingArea) {
   loadData();
   findStartFrame();
 
@@ -65,8 +69,16 @@ void ParkSimulation::run() {
     std::cout << "  Timestamp: " << frame.timestamp << std::endl;
     std::cout << "  Next Frame: " << frame.next << std::endl;
 
-    // 绘制当前帧
-    drawFrame(frame);
+    // 更新绘图
+    drawingArea->setEnvironment(env);
+    drawingArea->setParkingMap(parkingMap);
+    drawingArea->setCurrentFrame(frame);
+    drawingArea->redraw();
+    Fl::check();  // 使用 FLTK 的 check 方法
+
+    // 控制播放速度，延时 100 毫秒
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
     // 移动到下一帧
     currentFrameToken = frame.next;
   }

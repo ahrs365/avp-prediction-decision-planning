@@ -4,10 +4,10 @@
 #include <string>
 #include <unordered_map>
 
+#include "drawing_area.h"
 #include "park_data_reader/loader.h"
 #include "park_data_reader/park_env.h"
 #include "park_data_reader/parking_map.h"
-
 namespace park {
 class ParkSimulation {
  public:
@@ -17,7 +17,7 @@ class ParkSimulation {
                  const std::string& obstaclesFile, const std::string& mapFile,
                  int startFrameIndex, int endFrameIndex);
 
-  void run();
+  void run(DrawingArea* drawingArea);
 
  private:
   void loadData();

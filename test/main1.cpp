@@ -1,8 +1,13 @@
-#include <iostream>
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
 
-#include "park_data_reader/park_simulation.h"
-#include "park_data_reader/parking_map.h"
+#include "drawing_area.h"
+#include "park_simulation.h"
+
 int main() {
+  Fl_Window window(800, 600, "FLTK Park Simulation");
+  park::DrawingArea drawingArea(10, 10, 780, 580);
+
   park::ParkSimulation simulation(
       "./data/DJI_0012_scene.json", "./data/DJI_0012_agents.json",
       "./data/DJI_0012_frames.json", "./data/DJI_0012_instances.json",
@@ -10,7 +15,10 @@ int main() {
       100  // startFrameIndex, endFrameIndex
   );
 
-  simulation.run();
+  window.end();
+  window.show();
 
-  return 0;
+  simulation.run(&drawingArea);
+
+  return Fl::run();
 }

@@ -27,6 +27,7 @@ find_package(Eigen3 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(pybind11 REQUIRED)
 add_subdirectory(third_party/yaml-cpp)
+find_package(FLTK REQUIRED)
 
 # 定义项目的包含目录路径，这些路径中的头文件可以在项目中直接包含。
 set(INCLUDE_PATH 
@@ -37,7 +38,7 @@ set(INCLUDE_PATH
     ${CMAKE_SOURCE_DIR}/third_party/yaml-cpp/include
     ${EIGEN3_INCLUDE_DIR}
     ${PYBIND11_INCLUDE_DIRS}
-
+    ${FLTK_INCLUDE_DIR}
 )
 
 file(GLOB_RECURSE SRC_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
@@ -56,6 +57,7 @@ target_link_libraries(${PROJECT_NAME}
                       pybind11::module 
                       nlohmann_json::nlohmann_json
                       yaml-cpp
+                      ${FLTK_LIBRARIES}
 )
 
 
