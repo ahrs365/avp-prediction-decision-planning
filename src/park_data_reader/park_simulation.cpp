@@ -112,12 +112,7 @@ void ParkSimulation::run() {
   delete env;
 }
 
-void ParkSimulation::drawFrame(const Frame& frame) {
-  plt::clf();  // 清除当前图形
-
-  const auto& currentObstacles = env->getCurrentObstacles();
-  const auto& currentAgents = env->getCurrentAgents();
-
+void ParkSimulation::drawStaticElements() {
   // 绘制停车位
   auto parkingSpots = parkingMap.getParkingSpots();
   for (const auto& area : parkingSpots) {
@@ -130,32 +125,32 @@ void ParkSimulation::drawFrame(const Frame& frame) {
     }
   }
 
-  // 绘制障碍物
-  for (const auto& obstacle : currentObstacles) {
+  // 绘制静态障碍物
+  for (const auto& obstacle : obstacles) {
     std::vector<double> x, y;
-    x.push_back(obstacle.coords[0]);
-    y.push_back(obstacle.coords[1]);
+    x.push_back(obstacle.second.coords[0]);
+    y.push_back(obstacle.second.coords[1]);
 
     // 绘制矩形表示障碍物
-    double theta = obstacle.heading;
-    double half_length = obstacle.size[0] / 2;
-    double half_width = obstacle.size[1] / 2;
+    double theta = obstacle.second.heading;
+    double half_length = obstacle.second.size[0] / 2;
+    double half_width = obstacle.second.size[1] / 2;
     std::vector<std::pair<double, double>> corners = {
-        {obstacle.coords[0] + half_length * std::cos(theta) -
+        {obstacle.second.coords[0] + half_length * std::cos(theta) -
              half_width * std::sin(theta),
-         obstacle.coords[1] + half_length * std::sin(theta) +
+         obstacle.second.coords[1] + half_length * std::sin(theta) +
              half_width * std::cos(theta)},
-        {obstacle.coords[0] - half_length * std::cos(theta) -
+        {obstacle.second.coords[0] - half_length * std::cos(theta) -
              half_width * std::sin(theta),
-         obstacle.coords[1] - half_length * std::sin(theta) +
+         obstacle.second.coords[1] - half_length * std::sin(theta) +
              half_width * std::cos(theta)},
-        {obstacle.coords[0] - half_length * std::cos(theta) +
+        {obstacle.second.coords[0] - half_length * std::cos(theta) +
              half_width * std::sin(theta),
-         obstacle.coords[1] - half_length * std::sin(theta) -
+         obstacle.second.coords[1] - half_length * std::sin(theta) -
              half_width * std::cos(theta)},
-        {obstacle.coords[0] + half_length * std::cos(theta) +
+        {obstacle.second.coords[0] + half_length * std::cos(theta) +
              half_width * std::sin(theta),
-         obstacle.coords[1] + half_length * std::sin(theta) -
+         obstacle.second.coords[1] + half_length * std::sin(theta) -
              half_width * std::cos(theta)}};
 
     for (size_t i = 0; i < corners.size(); ++i) {
@@ -164,6 +159,29 @@ void ParkSimulation::drawFrame(const Frame& frame) {
                 {corners[i].second, corners[j].second}, "r-");
     }
   }
+
+  // 绘制航路点
+  const auto& routePoints = parkingMap.getAllRoutePoints();
+  for (const auto& point : routePoints) {
+    plt::scatter(std::vector<double>{point.first},
+                 std::vector<double>{point.second}, 10.0);
+  }
+
+  // 设置图形范围
+  plt::xlim(0, parkingMap.getMapSize().first);
+  plt::ylim(0, parkingMap.getMapSize().second);
+  plt::pause(0.01);  // 暂停以更新图形
+}
+
+void ParkSimulation::drawFrame(const Frame& frame) {
+  if (!staticElementsDrawn) {
+    drawStaticElements();
+    staticElementsDrawn = true;
+  }
+
+  plt::clf();  // 清除当前图形
+
+  const auto& currentAgents = env->getCurrentAgents();
 
   // 绘制代理
   for (const auto& agent : currentAgents) {
@@ -225,17 +243,7 @@ void ParkSimulation::drawFrame(const Frame& frame) {
     }
   }
 
-  // 绘制航路点
-  const auto& routePoints = parkingMap.getAllRoutePoints();
-  for (const auto& point : routePoints) {
-    plt::scatter(std::vector<double>{point.first},
-                 std::vector<double>{point.second}, 10.0);
-  }
-
-  // 设置图形范围
-  plt::xlim(0, parkingMap.getMapSize().first);
-  plt::ylim(0, parkingMap.getMapSize().second);
-  plt::pause(0.1);  // 暂停以更新图形
+  plt::pause(0.01);  // 暂停以更新图形
 }
 
 }  // namespace park

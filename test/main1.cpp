@@ -4,10 +4,10 @@
 #include "park_data_reader/parking_map.h"
 int main() {
   park::ParkSimulation simulation(
-      "./data/DJI_0002_scene.json", "./data/DJI_0002_agents.json",
-      "./data/DJI_0002_frames.json", "./data/DJI_0002_instances.json",
-      "./data/DJI_0002_obstacles.json", "./data/parking_map.yml", 0,
-      10  // startFrameIndex, endFrameIndex
+      "./data/DJI_0012_scene.json", "./data/DJI_0012_agents.json",
+      "./data/DJI_0012_frames.json", "./data/DJI_0012_instances.json",
+      "./data/DJI_0012_obstacles.json", "./data/parking_map.yml", 0,
+      1000  // startFrameIndex, endFrameIndex
   );
 
   simulation.run();

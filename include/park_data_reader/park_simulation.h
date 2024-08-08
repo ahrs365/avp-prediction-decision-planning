@@ -22,6 +22,7 @@ class ParkSimulation {
  private:
   void loadData();
   void findStartFrame();
+  void drawStaticElements();
   void drawFrame(const Frame& frame);
 
   std::string sceneFile;
@@ -39,7 +40,7 @@ class ParkSimulation {
   std::unordered_map<std::string, Instance> instances;
   std::unordered_map<std::string, Obstacle> obstacles;
   ParkingMap parkingMap;
-
+  bool staticElementsDrawn = false;
   Environment* env;
   std::string currentFrameToken;
 };
