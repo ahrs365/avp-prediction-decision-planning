@@ -138,7 +138,6 @@ void ParkSimulation::drawFrame(const Frame& frame) {
     drawStaticElements();
     staticElementsDrawn = true;
   }
-
   plt::clf();  // 清除当前图形
 
   // 绘制动态障碍物
@@ -166,10 +165,19 @@ void ParkSimulation::drawFrame(const Frame& frame) {
          obstacle.coords[1] + half_length * std::sin(theta) -
              half_width * std::cos(theta)}};
 
+    std::string color;
+    if (obstacle.type == "Car") {
+      color = "b-";
+    } else if (obstacle.type == "Pedestrian") {
+      color = "g-";
+    } else {
+      color = "y-";
+    }
+
     for (size_t i = 0; i < corners.size(); ++i) {
       size_t j = (i + 1) % corners.size();
       plt::plot({corners[i].first, corners[j].first},
-                {corners[i].second, corners[j].second}, "b-");
+                {corners[i].second, corners[j].second}, color);
     }
 
     // 绘制速度向量
@@ -177,7 +185,7 @@ void ParkSimulation::drawFrame(const Frame& frame) {
     double arrow_x = obstacle.coords[0] + arrow_length * std::cos(theta);
     double arrow_y = obstacle.coords[1] + arrow_length * std::sin(theta);
     plt::plot({obstacle.coords[0], arrow_x}, {obstacle.coords[1], arrow_y},
-              "b-");
+              color);
 
     // 绘制箭头头部
     double arrow_head_length = 0.1 * arrow_length;
@@ -190,8 +198,8 @@ void ParkSimulation::drawFrame(const Frame& frame) {
         arrow_x - arrow_head_length * std::cos(theta + arrow_head_angle);
     double head_y2 =
         arrow_y - arrow_head_length * std::sin(theta + arrow_head_angle);
-    plt::plot({arrow_x, head_x1}, {arrow_y, head_y1}, "b-");
-    plt::plot({arrow_x, head_x2}, {arrow_y, head_y2}, "b-");
+    plt::plot({arrow_x, head_x1}, {arrow_y, head_y1}, color);
+    plt::plot({arrow_x, head_x2}, {arrow_y, head_y2}, color);
   }
 
   plt::xlim(0, parkingMap.getMapSize().first);
