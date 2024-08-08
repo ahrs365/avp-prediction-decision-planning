@@ -8,6 +8,26 @@
 #include "park_data_reader/loader.h"
 #include "park_data_reader/parking_map.h"
 namespace park {
+
+struct StaticObstacle {
+ public:
+  std::string obstacle_token;
+  std::string type;
+  std::vector<double> size;
+  std::vector<double> coords;
+  double heading;
+};
+
+struct DynamicObstacle {
+  std::string agent_token;
+  std::string type;
+  std::vector<double> size;
+  std::vector<double> coords;
+  double heading;
+  double speed;
+  std::vector<double> acceleration;
+};
+
 class Environment {
  public:
   Environment(const std::unordered_map<std::string, Obstacle>& obstacles,
@@ -17,19 +37,21 @@ class Environment {
               const ParkingMap& parkingMap);
 
   void loadFrame(const Frame& frame);
-  const std::vector<Obstacle>& getCurrentObstacles() const;
-  const std::vector<Agent>& getCurrentAgents() const;
+  const std::unordered_map<std::string, StaticObstacle>&
+  getCurrentStaticObstacles() const;
+  const std::unordered_map<std::string, DynamicObstacle>&
+  getCurrentDynamicObstacles() const;
   const Instance* getInstance(const std::string& instance_token) const;
 
  private:
-  std::unordered_map<std::string, Obstacle> allObstacles;
   std::unordered_map<std::string, Frame> allFrames;
   std::unordered_map<std::string, Instance> allInstances;
   std::unordered_map<std::string, Agent> allAgents;
+
   ParkingMap parkingMap;
 
-  std::vector<Obstacle> currentObstacles;
-  std::vector<Agent> currentAgents;
+  std::unordered_map<std::string, StaticObstacle> allStaticObstacles;
+  std::unordered_map<std::string, DynamicObstacle> allDynamicObstacles;
 };
 
 }  // namespace park

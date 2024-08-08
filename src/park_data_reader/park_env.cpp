@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "park_data_reader/park_env.h"
+#include "park_env.h"
 
 namespace park {
 Environment::Environment(
@@ -9,42 +10,58 @@ Environment::Environment(
     const std::unordered_map<std::string, Instance>& instances,
     const std::unordered_map<std::string, Agent>& agents,
     const ParkingMap& parkingMap)
-    : allObstacles(obstacles),
-      allFrames(frames),
+    : allFrames(frames),
       allInstances(instances),
       allAgents(agents),
       parkingMap(parkingMap) {
   // 在构造函数中加载所有障碍物，因为它们是静态的
-  currentObstacles.clear();
-  for (const auto& obstacle : allObstacles) {
-    currentObstacles.push_back(obstacle.second);
+  allStaticObstacles.clear();
+  for (const auto& obstacle : obstacles) {
+    StaticObstacle static_obstacle;
+    static_obstacle.obstacle_token = obstacle.first;
+    static_obstacle.coords = obstacle.second.coords;
+    static_obstacle.heading = obstacle.second.heading;
+    static_obstacle.size = obstacle.second.size;
+    static_obstacle.type = obstacle.second.type;
+    allStaticObstacles.insert(std::make_pair(obstacle.first, static_obstacle));
   }
 }
 
 void Environment::loadFrame(const Frame& frame) {
-  currentAgents.clear();
+  allDynamicObstacles.clear();
   for (const auto& instance_token : frame.instances) {
     if (allInstances.find(instance_token) != allInstances.end()) {
       const auto& instance = allInstances[instance_token];
       if (allAgents.find(instance.agent_token) != allAgents.end()) {
         const auto& agent = allAgents[instance.agent_token];
-        currentAgents.push_back(agent);
+        DynamicObstacle dynamic_obstacle;
+        dynamic_obstacle.agent_token = agent.agent_token;
+        dynamic_obstacle.coords = instance.coords;
+        dynamic_obstacle.heading = instance.heading;
+        dynamic_obstacle.size = agent.size;
+        dynamic_obstacle.speed = instance.speed;
+        dynamic_obstacle.type = agent.type;
+        dynamic_obstacle.acceleration = instance.acceleration;
+        allDynamicObstacles.insert(
+            std::make_pair(dynamic_obstacle.agent_token, dynamic_obstacle));
       }
     }
   }
 
   // Debug output to check if obstacles and agents are being loaded
   std::cout << "Loaded frame " << frame.frame_token << " with "
-            << currentObstacles.size() << " obstacles and "
-            << currentAgents.size() << " agents." << std::endl;
+            << allStaticObstacles.size() << " static obstacles and "
+            << allDynamicObstacles.size() << " dynamic obstacles." << std::endl;
 }
 
-const std::vector<Obstacle>& Environment::getCurrentObstacles() const {
-  return currentObstacles;
+const std::unordered_map<std::string, StaticObstacle>&
+Environment::getCurrentStaticObstacles() const {
+  return allStaticObstacles;
 }
 
-const std::vector<Agent>& Environment::getCurrentAgents() const {
-  return currentAgents;
+const std::unordered_map<std::string, DynamicObstacle>&
+Environment::getCurrentDynamicObstacles() const {
+  return allDynamicObstacles;
 }
 
 const Instance* Environment::getInstance(
