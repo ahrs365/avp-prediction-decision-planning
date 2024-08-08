@@ -13,24 +13,26 @@ Environment::Environment(
       allFrames(frames),
       allInstances(instances),
       allAgents(agents),
-      parkingMap(parkingMap) {}
+      parkingMap(parkingMap) {
+  // 在构造函数中加载所有障碍物，因为它们是静态的
+  currentObstacles.clear();
+  for (const auto& obstacle : allObstacles) {
+    currentObstacles.push_back(obstacle.second);
+  }
+}
 
 void Environment::loadFrame(const Frame& frame) {
-  currentObstacles.clear();
   currentAgents.clear();
   for (const auto& instance_token : frame.instances) {
     if (allInstances.find(instance_token) != allInstances.end()) {
       const auto& instance = allInstances[instance_token];
-      if (allObstacles.find(instance_token) != allObstacles.end()) {
-        const auto& obstacle = allObstacles[instance_token];
-        currentObstacles.push_back(obstacle);
-      }
       if (allAgents.find(instance.agent_token) != allAgents.end()) {
         const auto& agent = allAgents[instance.agent_token];
         currentAgents.push_back(agent);
       }
     }
   }
+
   // Debug output to check if obstacles and agents are being loaded
   std::cout << "Loaded frame " << frame.frame_token << " with "
             << currentObstacles.size() << " obstacles and "

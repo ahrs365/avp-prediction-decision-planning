@@ -28,7 +28,7 @@ void ParkSimulation::loadData() {
   agents = Agent::loadFromFile(agentsFile);
   frames = Frame::loadFromFile(framesFile, startFrameIndex, endFrameIndex);
   instances = Instance::loadFromFile(instancesFile, frames);
-  obstacles = Obstacle::loadFromFile(obstaclesFile, frames);
+  obstacles = Obstacle::loadFromFile(obstaclesFile);
   parkingMap = ParkingMap::loadFromFile(mapFile);
   env = new Environment(obstacles, frames, instances, agents, parkingMap);
 }
@@ -67,41 +67,41 @@ void ParkSimulation::run() {
     std::cout << "  Timestamp: " << frame.timestamp << std::endl;
     std::cout << "  Next Frame: " << frame.next << std::endl;
 
-    // 输出当前帧的障碍物信息
-    std::cout << "  Obstacles in this frame:" << std::endl;
-    if (currentObstacles.empty()) {
-      std::cout << "    No obstacles in this frame." << std::endl;
-    } else {
-      for (const auto& obstacle : currentObstacles) {
-        std::cout << "    Obstacle: " << obstacle.obstacle_token
-                  << ", Type: " << obstacle.type << std::endl;
-      }
-    }
+    // // 输出当前帧的障碍物信息
+    // std::cout << "  Obstacles in this frame:" << std::endl;
+    // if (currentObstacles.empty()) {
+    //   std::cout << "    No obstacles in this frame." << std::endl;
+    // } else {
+    //   for (const auto& obstacle : currentObstacles) {
+    //     std::cout << "    Obstacle: " << obstacle.obstacle_token
+    //               << ", Type: " << obstacle.type << std::endl;
+    //   }
+    // }
 
-    // 输出当前帧的代理信息
-    std::cout << "  Agents in this frame:" << std::endl;
-    if (currentAgents.empty()) {
-      std::cout << "    No agents in this frame." << std::endl;
-    } else {
-      for (const auto& agent : currentAgents) {
-        const Instance* instance = env->getInstance(agent.first_instance);
-        if (instance) {
-          std::cout << "    Agent: " << agent.agent_token
-                    << "\n      Type: " << agent.type
-                    << "\n      Speed: " << instance->speed
-                    << "\n      Position: (" << instance->coords[0] << ", "
-                    << instance->coords[1] << ")"
-                    << "\n      Size: (" << agent.size[0] << ", "
-                    << agent.size[1] << ")\n";
-        } else {
-          std::cout << "    Agent: " << agent.agent_token
-                    << "\n      Type: " << agent.type << "\n      Speed: N/A"
-                    << "\n      Position: (N/A, N/A)"
-                    << "\n      Size: (" << agent.size[0] << ", "
-                    << agent.size[1] << ")\n";
-        }
-      }
-    }
+    // // 输出当前帧的代理信息
+    // std::cout << "  Agents in this frame:" << std::endl;
+    // if (currentAgents.empty()) {
+    //   std::cout << "    No agents in this frame." << std::endl;
+    // } else {
+    //   for (const auto& agent : currentAgents) {
+    //     const Instance* instance = env->getInstance(agent.first_instance);
+    //     if (instance) {
+    //       std::cout << "    Agent: " << agent.agent_token
+    //                 << "\n      Type: " << agent.type
+    //                 << "\n      Speed: " << instance->speed
+    //                 << "\n      Position: (" << instance->coords[0] << ", "
+    //                 << instance->coords[1] << ")"
+    //                 << "\n      Size: (" << agent.size[0] << ", "
+    //                 << agent.size[1] << ")\n";
+    //     } else {
+    //       std::cout << "    Agent: " << agent.agent_token
+    //                 << "\n      Type: " << agent.type << "\n      Speed: N/A"
+    //                 << "\n      Position: (N/A, N/A)"
+    //                 << "\n      Size: (" << agent.size[0] << ", "
+    //                 << agent.size[1] << ")\n";
+    //     }
+    //   }
+    // }
     // 绘制当前帧
     drawFrame(frame);
     // 移动到下一帧

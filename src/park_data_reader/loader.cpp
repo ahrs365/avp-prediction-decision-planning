@@ -62,8 +62,7 @@ std::unordered_map<std::string, Instance> Instance::loadFromFile(
 }
 
 std::unordered_map<std::string, Obstacle> Obstacle::loadFromFile(
-    const std::string& filepath,
-    const std::unordered_map<std::string, Frame>& frames) {
+    const std::string& filepath) {
   std::ifstream file(filepath);
   if (!file.is_open()) {
     std::cerr << "Error: Could not open file " << filepath << std::endl;
@@ -78,23 +77,16 @@ std::unordered_map<std::string, Obstacle> Obstacle::loadFromFile(
   }
 
   std::unordered_map<std::string, Obstacle> obstaclesMap;
-  for (auto& value : j) {
+  for (const auto& value : j) {
     try {
-      if (value["frame_token"].is_null()) {
-        continue;
-      }
-
-      std::string frame_token = value["frame_token"];
-      if (frames.find(frame_token) != frames.end()) {
-        std::string key = value["obstacle_token"];
-        Obstacle obstacle = {key,
-                             value["scene_token"],
-                             value["type"],
-                             value["size"].get<std::vector<double>>(),
-                             value["coords"].get<std::vector<double>>(),
-                             value["heading"]};
-        obstaclesMap[key] = obstacle;
-      }
+      std::string key = value["obstacle_token"];
+      Obstacle obstacle = {key,
+                           value["scene_token"],
+                           value["type"],
+                           value["size"].get<std::vector<double>>(),
+                           value["coords"].get<std::vector<double>>(),
+                           value["heading"]};
+      obstaclesMap[key] = obstacle;
     } catch (const json::type_error& e) {
       std::cerr << "Type error in JSON data: " << e.what() << std::endl;
       std::cerr << "Offending JSON: " << value.dump() << std::endl;

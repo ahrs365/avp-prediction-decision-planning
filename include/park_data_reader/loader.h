@@ -63,8 +63,7 @@ struct Obstacle {
   double heading;
 
   static std::unordered_map<std::string, Obstacle> loadFromFile(
-      const std::string& filepath,
-      const std::unordered_map<std::string, Frame>& frames);
+      const std::string& filepath);
 };
 
 struct Scene {

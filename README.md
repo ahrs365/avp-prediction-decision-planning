@@ -233,3 +233,5 @@ first_instance和last_instance是实例的标识符，表示代理在录制中�
 
 # 2.数据集回放功能
 ![!\[alt text\](image.png)](doc/pic/2.png)
+显示静态车
+![alt text](doc/pic/3.png)
