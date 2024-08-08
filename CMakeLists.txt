@@ -31,6 +31,7 @@ add_subdirectory(third_party/yaml-cpp)
 # 定义项目的包含目录路径，这些路径中的头文件可以在项目中直接包含。
 set(INCLUDE_PATH 
     ${CMAKE_SOURCE_DIR}/include 
+    ${CMAKE_SOURCE_DIR}/include/park_data_reader
     ${Python3_INCLUDE_DIRS} 
     ${CMAKE_SOURCE_DIR}/third_party/matplotlib-cpp 
     ${CMAKE_SOURCE_DIR}/third_party/yaml-cpp/include

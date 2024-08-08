@@ -6,6 +6,7 @@
 
 #include "park_data_reader/loader.h"
 #include "park_data_reader/park_env.h"
+#include "park_data_reader/parking_map.h"
 
 namespace park {
 class ParkSimulation {
@@ -21,6 +22,7 @@ class ParkSimulation {
  private:
   void loadData();
   void findStartFrame();
+  void drawFrame(const Frame& frame);
 
   std::string sceneFile;
   std::string agentsFile;

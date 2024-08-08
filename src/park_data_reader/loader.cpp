@@ -160,48 +160,4 @@ Scene Scene::loadFromFile(const std::string& filepath) {
   return scene;
 }
 
-// 读取 parking_map.yml 并解析内容
-ParkingMap ParkingMap::loadFromFile(const std::string& filepath) {
-  YAML::Node config = YAML::LoadFile(filepath);
-  ParkingMap parkingMap;
-
-  // 读取地图尺寸
-  parkingMap.map_size = std::make_pair(config["MAP_SIZE"]["x"].as<int>(),
-                                       config["MAP_SIZE"]["y"].as<int>());
-
-  // 读取停车区域
-  for (const auto& area : config["PARKING_AREAS"]) {
-    ParkingArea parkingArea;
-    for (const auto& bound : area.second["bounds"]) {
-      parkingArea.bounds.push_back(
-          {bound[0].as<double>(), bound[1].as<double>()});
-    }
-
-    for (const auto& a : area.second["areas"]) {
-      std::vector<double> coords;
-      if (a["coords"]) {
-        for (const auto& coord : a["coords"]) {
-          coords.push_back(coord.as<double>());
-        }
-      }
-      parkingArea.areas.push_back(
-          {coords, {a["shape"][0].as<int>(), a["shape"][1].as<int>()}});
-    }
-    parkingMap.parking_areas[area.first.as<std::string>()] = parkingArea;
-  }
-
-  // 读取航路点
-  for (const auto& waypoint : config["WAYPOINTS"]) {
-    Waypoint wp;
-    wp.start = {waypoint.second["bounds"][0][0].as<double>(),
-                waypoint.second["bounds"][0][1].as<double>()};
-    wp.end = {waypoint.second["bounds"][1][0].as<double>(),
-              waypoint.second["bounds"][1][1].as<double>()};
-    wp.nums = waypoint.second["nums"].as<int>();
-    parkingMap.waypoints[waypoint.first.as<std::string>()] = wp;
-  }
-
-  return parkingMap;
-}
-
 }  // namespace park

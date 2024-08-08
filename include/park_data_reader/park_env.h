@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "park_data_reader/loader.h"
-
+#include "park_data_reader/parking_map.h"
 namespace park {
 class Environment {
  public:
@@ -20,8 +20,6 @@ class Environment {
   const std::vector<Obstacle>& getCurrentObstacles() const;
   const std::vector<Agent>& getCurrentAgents() const;
   const Instance* getInstance(const std::string& instance_token) const;
-
-  void printParkingMapInfo() const;  // 添加打印停车位和航路点信息的方法
 
  private:
   std::unordered_map<std::string, Obstacle> allObstacles;
