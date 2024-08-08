@@ -2,18 +2,22 @@
 #include <limits>
 
 #include "park_data_reader/park_simulation.h"
+
 namespace park {
+
 ParkSimulation::ParkSimulation(const std::string& sceneFile,
                                const std::string& agentsFile,
                                const std::string& framesFile,
                                const std::string& instancesFile,
                                const std::string& obstaclesFile,
-                               int startFrameIndex, int endFrameIndex)
+                               const std::string& mapFile, int startFrameIndex,
+                               int endFrameIndex)
     : sceneFile(sceneFile),
       agentsFile(agentsFile),
       framesFile(framesFile),
       instancesFile(instancesFile),
       obstaclesFile(obstaclesFile),
+      mapFile(mapFile),
       startFrameIndex(startFrameIndex),
       endFrameIndex(endFrameIndex),
       env(nullptr) {}
@@ -24,7 +28,11 @@ void ParkSimulation::loadData() {
   frames = Frame::loadFromFile(framesFile, startFrameIndex, endFrameIndex);
   instances = Instance::loadFromFile(instancesFile, frames);
   obstacles = Obstacle::loadFromFile(obstaclesFile, frames);
-  env = new Environment(obstacles, frames, instances, agents);
+  parkingMap = ParkingMap::loadFromFile(mapFile);
+  env = new Environment(obstacles, frames, instances, agents, parkingMap);
+
+  // 打印环境中的停车位和航路点信息
+  env->printParkingMapInfo();
 }
 
 void ParkSimulation::findStartFrame() {
@@ -104,4 +112,5 @@ void ParkSimulation::run() {
   // 清理环境对象
   delete env;
 }
+
 }  // namespace park

@@ -6,10 +6,12 @@
 #include <vector>
 
 #include "nlohmann/json.hpp"  // nlohmann/json
+#include "yaml-cpp/yaml.h"    // yaml-cpp
 
 using json = nlohmann::json;
 
 namespace park {
+
 // 数据结构定义
 struct Agent {
   std::string agent_token;
@@ -75,6 +77,26 @@ struct Scene {
   std::vector<std::string> obstacles;
 
   static Scene loadFromFile(const std::string& filepath);
+};
+
+// 新增结构体表示停车位和航路点
+struct ParkingArea {
+  std::vector<std::vector<double>> bounds;
+  std::vector<std::pair<std::vector<double>, std::pair<int, int>>> areas;
+};
+
+struct Waypoint {
+  std::vector<double> start;
+  std::vector<double> end;
+  int nums;
+};
+
+struct ParkingMap {
+  std::pair<int, int> map_size;
+  std::unordered_map<std::string, ParkingArea> parking_areas;
+  std::unordered_map<std::string, Waypoint> waypoints;
+
+  static ParkingMap loadFromFile(const std::string& filepath);
 };
 
 }  // namespace park

@@ -1,16 +1,19 @@
 #include <iostream>
 
 #include "park_data_reader/park_env.h"
+
 namespace park {
 Environment::Environment(
     const std::unordered_map<std::string, Obstacle>& obstacles,
     const std::unordered_map<std::string, Frame>& frames,
     const std::unordered_map<std::string, Instance>& instances,
-    const std::unordered_map<std::string, Agent>& agents)
+    const std::unordered_map<std::string, Agent>& agents,
+    const ParkingMap& parkingMap)
     : allObstacles(obstacles),
       allFrames(frames),
       allInstances(instances),
-      allAgents(agents) {}
+      allAgents(agents),
+      parkingMap(parkingMap) {}
 
 void Environment::loadFrame(const Frame& frame) {
   currentObstacles.clear();
@@ -49,6 +52,38 @@ const Instance* Environment::getInstance(
     return &(it->second);
   }
   return nullptr;
+}
+
+void Environment::printParkingMapInfo() const {
+  std::cout << "Parking Map Size: " << parkingMap.map_size.first << " x "
+            << parkingMap.map_size.second << std::endl;
+
+  std::cout << "Parking Areas:" << std::endl;
+  for (const auto& [area_name, area] : parkingMap.parking_areas) {
+    std::cout << "  Area " << area_name << " bounds:" << std::endl;
+    for (const auto& bound : area.bounds) {
+      std::cout << "    [" << bound[0] << ", " << bound[1] << "]" << std::endl;
+    }
+    for (const auto& a : area.areas) {
+      std::cout << "    Shape: [" << a.second.first << ", " << a.second.second
+                << "]" << std::endl;
+      if (!a.first.empty()) {
+        std::cout << "    Coords: ";
+        for (const auto& coord : a.first) {
+          std::cout << coord << " ";
+        }
+        std::cout << std::endl;
+      }
+    }
+  }
+
+  std::cout << "Waypoints:" << std::endl;
+  for (const auto& [waypoint_name, waypoint] : parkingMap.waypoints) {
+    std::cout << "  Waypoint " << waypoint_name << " from ["
+              << waypoint.start[0] << ", " << waypoint.start[1] << "] to ["
+              << waypoint.end[0] << ", " << waypoint.end[1] << "] with "
+              << waypoint.nums << " points." << std::endl;
+  }
 }
 
 }  // namespace park

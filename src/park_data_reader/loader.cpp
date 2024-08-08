@@ -2,8 +2,10 @@
 #include <iostream>
 
 #include "park_data_reader/loader.h"
+#include "yaml-cpp/yaml.h"  // yaml-cpp
 
 namespace park {
+
 std::unordered_map<std::string, Agent> Agent::loadFromFile(
     const std::string& filepath) {
   std::ifstream file(filepath);
@@ -79,8 +81,6 @@ std::unordered_map<std::string, Obstacle> Obstacle::loadFromFile(
   for (auto& value : j) {
     try {
       if (value["frame_token"].is_null()) {
-        // std::cerr << "Skipping JSON with null frame_token: " << value.dump()
-        //           << std::endl;
         continue;
       }
 
@@ -135,7 +135,6 @@ std::unordered_map<std::string, Frame> Frame::loadFromFile(
 
   std::unordered_map<std::string, Frame> framesMap;
   for (int i = start_index; i <= end_index && i < framesVec.size(); ++i) {
-    // framesMap.insert({framesVec[i].first, framesVec[i].second});
     framesMap[framesVec[i].first] = framesVec[i].second;
   }
 
@@ -159,6 +158,50 @@ Scene Scene::loadFromFile(const std::string& filepath) {
                  j["agents"].get<std::vector<std::string>>(),
                  j["obstacles"].get<std::vector<std::string>>()};
   return scene;
+}
+
+// 读取 parking_map.yml 并解析内容
+ParkingMap ParkingMap::loadFromFile(const std::string& filepath) {
+  YAML::Node config = YAML::LoadFile(filepath);
+  ParkingMap parkingMap;
+
+  // 读取地图尺寸
+  parkingMap.map_size = std::make_pair(config["MAP_SIZE"]["x"].as<int>(),
+                                       config["MAP_SIZE"]["y"].as<int>());
+
+  // 读取停车区域
+  for (const auto& area : config["PARKING_AREAS"]) {
+    ParkingArea parkingArea;
+    for (const auto& bound : area.second["bounds"]) {
+      parkingArea.bounds.push_back(
+          {bound[0].as<double>(), bound[1].as<double>()});
+    }
+
+    for (const auto& a : area.second["areas"]) {
+      std::vector<double> coords;
+      if (a["coords"]) {
+        for (const auto& coord : a["coords"]) {
+          coords.push_back(coord.as<double>());
+        }
+      }
+      parkingArea.areas.push_back(
+          {coords, {a["shape"][0].as<int>(), a["shape"][1].as<int>()}});
+    }
+    parkingMap.parking_areas[area.first.as<std::string>()] = parkingArea;
+  }
+
+  // 读取航路点
+  for (const auto& waypoint : config["WAYPOINTS"]) {
+    Waypoint wp;
+    wp.start = {waypoint.second["bounds"][0][0].as<double>(),
+                waypoint.second["bounds"][0][1].as<double>()};
+    wp.end = {waypoint.second["bounds"][1][0].as<double>(),
+              waypoint.second["bounds"][1][1].as<double>()};
+    wp.nums = waypoint.second["nums"].as<int>();
+    parkingMap.waypoints[waypoint.first.as<std::string>()] = wp;
+  }
+
+  return parkingMap;
 }
 
 }  // namespace park
