@@ -50,9 +50,9 @@ void DrawingArea::drawStaticElements() {
         size_t j = (i + 1) % spot.corners.size();
         fl_color(FL_GRAY);
         fl_line(x() + spot.corners[i].first * scale,
-                y() + spot.corners[i].second * scale,
+                y() + draw_height - spot.corners[i].second * scale,
                 x() + spot.corners[j].first * scale,
-                y() + spot.corners[j].second * scale);
+                y() + draw_height - spot.corners[j].second * scale);
       }
     }
   }
@@ -82,19 +82,21 @@ void DrawingArea::drawStaticElements() {
          obstacle.coords[1] + half_length * std::sin(theta) -
              half_width * std::cos(theta)}};
 
-    fl_color(FL_RED);
+    fl_color(fl_rgb_color(255, 0, 0));  // 红色
+    fl_begin_polygon();
     for (size_t i = 0; i < corners.size(); ++i) {
-      size_t j = (i + 1) % corners.size();
-      fl_line(x() + corners[i].first * scale, y() + corners[i].second * scale,
-              x() + corners[j].first * scale, y() + corners[j].second * scale);
+      fl_vertex(x() + corners[i].first * scale,
+                y() + draw_height - corners[i].second * scale);
     }
+    fl_end_polygon();
   }
 
   // 绘制航路点
   const auto& routePoints = parkingMap.getAllRoutePoints();
   for (const auto& point : routePoints) {
     fl_color(FL_BLACK);
-    fl_point(x() + point.first * scale, y() + point.second * scale);
+    fl_point(x() + point.first * scale,
+             y() + draw_height - point.second * scale);
   }
 }
 
@@ -143,19 +145,29 @@ void DrawingArea::drawFrame() {
          obstacle.coords[1] + half_length * std::sin(theta) -
              half_width * std::cos(theta)}};
 
-    fl_color(FL_BLUE);
-    for (size_t i = 0; i < corners.size(); ++i) {
-      size_t j = (i + 1) % corners.size();
-      fl_line(x() + corners[i].first * scale, y() + corners[i].second * scale,
-              x() + corners[j].first * scale, y() + corners[j].second * scale);
+    // 使用不同的颜色绘制 pedestrian 和 car 类型
+    if (obstacle.type == "Car") {
+      fl_color(fl_rgb_color(0, 255, 255));  // 蓝色
+    } else if (obstacle.type == "Pedestrian") {
+      fl_color(fl_rgb_color(0, 255, 0));  // 绿色
+    } else {
+      fl_color(fl_rgb_color(255, 255, 0));  // 黄色
     }
+    fl_begin_polygon();
+    for (size_t i = 0; i < corners.size(); ++i) {
+      fl_vertex(x() + corners[i].first * scale,
+                y() + draw_height - corners[i].second * scale);
+    }
+    fl_end_polygon();
 
     // 绘制速度向量
-    double arrow_length = 0.5 * obstacle.speed;
+    fl_color(FL_BLACK);
+    double arrow_length = 2 * obstacle.speed;
     double arrow_x = obstacle.coords[0] + arrow_length * std::cos(theta);
     double arrow_y = obstacle.coords[1] + arrow_length * std::sin(theta);
-    fl_line(x() + obstacle.coords[0] * scale, y() + obstacle.coords[1] * scale,
-            x() + arrow_x * scale, y() + arrow_y * scale);
+    fl_line(x() + obstacle.coords[0] * scale,
+            y() + draw_height - obstacle.coords[1] * scale,
+            x() + arrow_x * scale, y() + draw_height - arrow_y * scale);
 
     // 绘制箭头头部
     double arrow_head_length = 0.1 * arrow_length;
@@ -168,10 +180,11 @@ void DrawingArea::drawFrame() {
         arrow_x - arrow_head_length * std::cos(theta + arrow_head_angle);
     double head_y2 =
         arrow_y - arrow_head_length * std::sin(theta + arrow_head_angle);
-    fl_line(x() + arrow_x * scale, y() + arrow_y * scale, x() + head_x1 * scale,
-            y() + head_y1 * scale);
-    fl_line(x() + arrow_x * scale, y() + arrow_y * scale, x() + head_x2 * scale,
-            y() + head_y2 * scale);
+
+    fl_line(x() + arrow_x * scale, y() + draw_height - arrow_y * scale,
+            x() + head_x1 * scale, y() + draw_height - head_y1 * scale);
+    fl_line(x() + arrow_x * scale, y() + draw_height - arrow_y * scale,
+            x() + head_x2 * scale, y() + draw_height - head_y2 * scale);
   }
 }
 
