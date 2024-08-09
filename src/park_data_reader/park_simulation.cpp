@@ -49,11 +49,12 @@ void ParkSimulation::findStartFrame() {
   }
 }
 
-void ParkSimulation::run(DrawingArea* drawingArea) {
+void ParkSimulation::run(double cycle_time_ms) {
   loadData();
   findStartFrame();
 
   while (!currentFrameToken.empty()) {
+    auto start_time = std::chrono::steady_clock::now();
     auto it = frames.find(currentFrameToken);
     if (it == frames.end()) {
       std::cerr << "Error: Frame token " << currentFrameToken
@@ -69,15 +70,25 @@ void ParkSimulation::run(DrawingArea* drawingArea) {
     std::cout << "  Timestamp: " << frame.timestamp << std::endl;
     std::cout << "  Next Frame: " << frame.next << std::endl;
 
-    // 更新绘图
-    drawingArea->setEnvironment(env);
-    drawingArea->setParkingMap(parkingMap);
-    drawingArea->setCurrentFrame(frame);
-    drawingArea->redraw();
-    Fl::check();  // 使用 FLTK 的 check 方法
+    // // 更新绘图
+    // drawingArea->setEnvironment(env);
+    // drawingArea->setParkingMap(parkingMap);
+    // drawingArea->setCurrentFrame(frame);
+    // drawingArea->redraw();
+    // Fl::check();  // 使用 FLTK 的 check 方法
 
-    // 控制播放速度，延时 100 毫秒
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    // 将数据发送到建图线程
+    {
+      std::lock_guard<std::mutex> lock(*mutex_);
+      envQueue_->push(env);
+      parkingMapQueue_->push(&parkingMap);
+    }
+    cv_->notify_all();
+
+    // 控制回放线程周期
+    std::this_thread::sleep_until(
+        start_time +
+        std::chrono::milliseconds(static_cast<int>(cycle_time_ms)));
 
     // 移动到下一帧
     currentFrameToken = frame.next;
@@ -217,6 +228,15 @@ void ParkSimulation::drawFrame(const Frame& frame) {
   plt::xlim(0, parkingMap.getMapSize().first);
   plt::ylim(0, parkingMap.getMapSize().second);
   plt::pause(0.01);  // 暂停以更新图形
+}
+
+void ParkSimulation::setQueues(std::queue<Environment*>& envQueue,
+                               std::queue<ParkingMap*>& parkingMapQueue,
+                               std::mutex& mutex, std::condition_variable& cv) {
+  envQueue_ = &envQueue;
+  parkingMapQueue_ = &parkingMapQueue;
+  mutex_ = &mutex;
+  cv_ = &cv;
 }
 
 }  // namespace park

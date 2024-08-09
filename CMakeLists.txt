@@ -28,11 +28,14 @@ find_package(nlohmann_json REQUIRED)
 find_package(pybind11 REQUIRED)
 add_subdirectory(third_party/yaml-cpp)
 find_package(FLTK REQUIRED)
-
+find_package(Threads REQUIRED)
 # 定义项目的包含目录路径，这些路径中的头文件可以在项目中直接包含。
 set(INCLUDE_PATH 
     ${CMAKE_SOURCE_DIR}/include 
     ${CMAKE_SOURCE_DIR}/include/park_data_reader
+    ${CMAKE_SOURCE_DIR}/include/common
+    ${CMAKE_SOURCE_DIR}/include/eudm_planner
+    ${CMAKE_SOURCE_DIR}/include/semantic_map_manager
     ${Python3_INCLUDE_DIRS} 
     ${CMAKE_SOURCE_DIR}/third_party/matplotlib-cpp 
     ${CMAKE_SOURCE_DIR}/third_party/yaml-cpp/include
@@ -44,7 +47,7 @@ set(INCLUDE_PATH
 file(GLOB_RECURSE SRC_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 # aux_source_directory(src SRC_FILES)
 # 添加一个可执行目标到项目中，并指定构建这个目标需要的源文件。
-add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/test/main1.cpp ${SRC_FILES})
+add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/test/main2.cpp ${SRC_FILES})
 
 # 为可执行目标设置私有包含目录，这意味着这些目录只对这个目标可见。
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_PATH})
@@ -58,6 +61,7 @@ target_link_libraries(${PROJECT_NAME}
                       nlohmann_json::nlohmann_json
                       yaml-cpp
                       ${FLTK_LIBRARIES}
+                      Threads::Threads
 )
 
 

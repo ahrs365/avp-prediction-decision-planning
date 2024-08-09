@@ -1,6 +1,10 @@
 #ifndef PARKSIMULATION_HPP
 #define PARKSIMULATION_HPP
 
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
+#include <queue>
 #include <string>
 #include <unordered_map>
 
@@ -17,7 +21,10 @@ class ParkSimulation {
                  const std::string& obstaclesFile, const std::string& mapFile,
                  int startFrameIndex, int endFrameIndex);
 
-  void run(DrawingArea* drawingArea);
+  void run(double cycle_time_ms);
+  void setQueues(std::queue<Environment*>& envQueue,
+                 std::queue<ParkingMap*>& parkingMapQueue, std::mutex& mutex,
+                 std::condition_variable& cv);
 
  private:
   void loadData();
@@ -43,6 +50,12 @@ class ParkSimulation {
   bool staticElementsDrawn = false;
   Environment* env;
   std::string currentFrameToken;
+
+  // ParkingMap* parkingMap;
+  std::queue<Environment*>* envQueue_;
+  std::queue<ParkingMap*>* parkingMapQueue_;
+  std::mutex* mutex_;
+  std::condition_variable* cv_;
 };
 
 }  // namespace park
