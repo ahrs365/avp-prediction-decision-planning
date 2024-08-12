@@ -97,7 +97,9 @@ void MapAdapter::GetSimulationDataFromDynamic(Environment* env) {
   printf("[MapAdapter] GetSimulationDataFromDynamic ...\n");
   time_stamp_ = env->getTimeStamp();
   int id = 0;
-  const auto& obstacles = env->getCurrentDynamicObstacles();
+  //这里注意不要用 const auto& obstacle =
+  //env->getCurrentDynamicObstacles(),避免线程之间冲突
+  auto obstacles = env->getCurrentDynamicObstacles();
 
   for (const auto obs : obstacles) {
     common::Vehicle vehicle;
