@@ -28,6 +28,7 @@ Environment::Environment(
 
 void Environment::loadFrame(const Frame& frame) {
   allDynamicObstacles.clear();
+  setTimeStamp(frame.timestamp);
   for (const auto& instance_token : frame.instances) {
     if (allInstances.find(instance_token) != allInstances.end()) {
       const auto& instance = allInstances[instance_token];
@@ -73,4 +74,8 @@ const Instance* Environment::getInstance(
   return nullptr;
 }
 
+const double Environment::getTimeStamp() const { return time_stamp_; }
+void Environment::setTimeStamp(const double& time_stamp) {
+  time_stamp_ = time_stamp;
+}
 }  // namespace park

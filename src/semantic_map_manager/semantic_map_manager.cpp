@@ -10,6 +10,7 @@ SemanticMapManager::SemanticMapManager(const int &id,
   p_config_loader_->set_agent_config_path(agent_config_path_);
   p_config_loader_->ParseAgentConfig(&agent_config_info_);
   global_timer_.tic();
+  printf("[SemanticMapManager1] Initialization finished\n");
 }
 
 SemanticMapManager::SemanticMapManager(
@@ -24,6 +25,7 @@ SemanticMapManager::SemanticMapManager(
   agent_config_info_.enable_fast_lane_lut = true;
   use_right_hand_axis_ = use_right_hand_axis;
   is_simple_lane_structure_ = true;
+  printf("[SemanticMapManager] Initialization finished\n");
 }
 
 ErrorType SemanticMapManager::UpdateSemanticMap(
@@ -33,6 +35,8 @@ ErrorType SemanticMapManager::UpdateSemanticMap(
     const common::GridMapND<ObstacleMapType, 2> &obstacle_map,
     const std::set<std::array<decimal_t, 2>> &obstacle_grids,
     const common::VehicleSet &surrounding_vehicles) {
+  printf("[SemanticMapManager] UpdateSemanticMap...\n");
+
   TicToc timer;
   time_stamp_ = time_stamp;
   set_ego_vehicle(ego_vehicle);

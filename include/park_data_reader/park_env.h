@@ -42,8 +42,11 @@ class Environment {
   const std::unordered_map<std::string, DynamicObstacle>&
   getCurrentDynamicObstacles() const;
   const Instance* getInstance(const std::string& instance_token) const;
+  const double getTimeStamp() const;
+  void setTimeStamp(const double& time_stamp);
 
  private:
+  double time_stamp_;
   std::unordered_map<std::string, Frame> allFrames;
   std::unordered_map<std::string, Instance> allInstances;
   std::unordered_map<std::string, Agent> allAgents;

@@ -41,13 +41,13 @@ int main() {
                            replay_cycle_time_ms);
   std::thread mapThread(&semantic_map_manager::MapAdapter::run, &mapAdapter,
                         map_cycle_time_ms);
-  std::thread plannerThread(&planning::EudmServer::run, &planner,
-                            planner_cycle_time_ms);
+  // std::thread plannerThread(&planning::EudmServer::run, &planner,
+  //                           planner_cycle_time_ms);
 
   // 等待线程结束
   replayThread.join();
   mapThread.join();
-  plannerThread.join();
+  // plannerThread.join();
 
   return 0;
 }

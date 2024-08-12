@@ -5,6 +5,7 @@
 namespace semantic_map_manager {
 
 MapAdapter::MapAdapter(SemanticMapManager* ptr_smm) {
+  printf("[MapAdapter] Initialization ...\n");
   p_smm_ = ptr_smm;
   p_data_renderer_ = new DataRenderer(ptr_smm);
 }
@@ -70,22 +71,110 @@ void semantic_map_manager::MapAdapter::setQueues(
   cv_ = &cv;
 }
 
-void MapAdapter::GetSimulationDataFromStatic(ParkingMap* parkingMap) {
+void MapAdapter::GetSimulationDataFromStatic(Environment* env) {
+  printf("[MapAdapter] GetSimulationDataFromStatic ...\n");
   get_arena_info_static_ = true;
+  // GetLaneNetFromRosLaneNet
+
+  // GetObstacleSetFromRosObstacleSet
+  obstacle_set_.obs_circle.clear();
+  obstacle_set_.obs_polygon.clear();
+  auto const& obstacles = env->getCurrentStaticObstacles();
+  int id = 0;
+  for (const auto obs : obstacles) {
+    // common::CircleObstacle obs_temp;
+    // GetCircleObstacleFromRosCircleObstacle(obs, &obs_temp);
+    common::PolygonObstacle obs_temp;
+    obs_temp.id = id++;
+    obs_temp.type = 0;
+    GetPolygonFromSimulationData(obs.second, &obs_temp);
+    obstacle_set_.obs_polygon.insert(
+        std::pair<int, common::PolygonObstacle>(obs_temp.id, obs_temp));
+  }
 }
 
 void MapAdapter::GetSimulationDataFromDynamic(Environment* env) {
-  time_stamp_ += 0.01;
+  printf("[MapAdapter] GetSimulationDataFromDynamic ...\n");
+  time_stamp_ = env->getTimeStamp();
+  int id = 0;
+  const auto& obstacles = env->getCurrentDynamicObstacles();
+
+  for (const auto obs : obstacles) {
+    common::Vehicle vehicle;
+    vehicle.set_id(id++);
+    GetVehicleFromSimulationData(obs.second, &vehicle);
+    vehicle_set_.vehicles.insert(
+        std::pair<int, common::Vehicle>(vehicle.id(), vehicle));
+  }
 }
 
+void MapAdapter::GetPolygonFromSimulationData(const StaticObstacle& obs,
+                                              common::PolygonObstacle* poly) {
+  double theta = obs.heading;
+  double half_length = obs.size[0] / 2;
+  double half_width = obs.size[1] / 2;
+  std::vector<std::pair<double, double>> corners = {
+      {obs.coords[0] + half_length * std::cos(theta) -
+           half_width * std::sin(theta),
+       obs.coords[1] + half_length * std::sin(theta) +
+           half_width * std::cos(theta)},
+      {obs.coords[0] - half_length * std::cos(theta) -
+           half_width * std::sin(theta),
+       obs.coords[1] - half_length * std::sin(theta) +
+           half_width * std::cos(theta)},
+      {obs.coords[0] - half_length * std::cos(theta) +
+           half_width * std::sin(theta),
+       obs.coords[1] - half_length * std::sin(theta) -
+           half_width * std::cos(theta)},
+      {obs.coords[0] + half_length * std::cos(theta) +
+           half_width * std::sin(theta),
+       obs.coords[1] + half_length * std::sin(theta) -
+           half_width * std::cos(theta)}};
+  for (const auto p : corners) {
+    common::Point pt;
+    pt.x = p.first;
+    pt.y = p.second;
+    poly->polygon.points.push_back(pt);
+  }
+}
+void MapAdapter::GetVehicleFromSimulationData(const DynamicObstacle& obs,
+                                              common::Vehicle* vehicle) {
+  vehicle->set_subclass(obs.type);
+  vehicle->set_type("VehicleWithBicycleKinematics");
+  common::VehicleParam param;
+  param.set_width(obs.size[1]);
+  param.set_length(obs.size[0]);
+  param.set_wheel_base(2.85);
+  param.set_front_suspension((obs.size[0] - 2.85) / 2);
+  param.set_rear_suspension((obs.size[0] - 2.85) / 2);
+  param.set_max_steering_angle(45);
+  param.set_max_longitudinal_acc(2.0);
+  param.set_max_lateral_acc(2.0);
+  // param.set_d_cr(msg.d_cr);
+
+  common::State state;
+  // GetStateFromSimulationData(obs, &state);
+  state.time_stamp = time_stamp_;
+  state.vec_position = {obs.coords[0], obs.coords[1]};
+  state.angle = obs.heading;
+  state.curvature = 0;
+  state.velocity = obs.speed;
+  state.acceleration = std::sqrt(obs.acceleration[0] * obs.acceleration[0] +
+                                 obs.acceleration[1] * obs.acceleration[1]);
+  state.steer = 0;
+  vehicle->set_param(param);
+  vehicle->set_state(state);
+}
 void MapAdapter::updateMap(Environment* env, ParkingMap* parkingMap) {
+  printf("[MapAdapter] updateMap ...\n");
   if (!get_arena_info_static_) {
     // 静态障碍物转换(一次就行)
-    GetSimulationDataFromStatic(parkingMap);
+    GetSimulationDataFromStatic(env);
   } else {
     // 动态障碍物转换
     GetSimulationDataFromDynamic(env);
   }
-  p_data_renderer_->Render(time_stamp_, lane_net_, vehicle_set_, obstacle_set_);
+  // p_data_renderer_->Render(time_stamp_, lane_net_, vehicle_set_,
+  // obstacle_set_);
 }
 }  // namespace semantic_map_manager

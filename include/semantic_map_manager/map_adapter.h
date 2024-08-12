@@ -44,8 +44,12 @@ class MapAdapter {
   SemanticMapManager* p_smm_;
   bool get_arena_info_static_ = false;
 
-  void GetSimulationDataFromStatic(ParkingMap* parkingMap);
+  void GetSimulationDataFromStatic(Environment* env);
   void GetSimulationDataFromDynamic(Environment* env);
+  void GetPolygonFromSimulationData(const StaticObstacle& obs,
+                                    common::PolygonObstacle* poly);
+  void GetVehicleFromSimulationData(const DynamicObstacle& obs,
+                                    common::Vehicle* vehicle);
   void updateMap(Environment* env, ParkingMap* parkingMap);
 };
 }  // namespace semantic_map_manager
