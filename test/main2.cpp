@@ -3,15 +3,15 @@
 
 #include <thread>
 
-#include "drawing_area.h"
-#include "eudm_server.h"
-#include "map_adapter.h"
-#include "park_simulation.h"
+#include "eudm_planner/eudm_server.h"
+#include "park_data_reader/drawing_area.h"
+#include "park_data_reader/park_simulation.h"
+#include "semantic_map_manager/map_adapter.h"
 
 int main() {
   std::queue<Environment*> envQueue;
   std::queue<ParkingMap*> parkingMapQueue;
-  std::queue<SemanticMapManager> smmQueue;
+  std::queue<SemanticMapManager*> smmQueue;
   std::mutex mutex;
   std::condition_variable cv;
 
@@ -22,7 +22,8 @@ int main() {
       "./data/DJI_0012_obstacles.json", "./data/parking_map.yml", 0,
       100  // startFrameIndex, endFrameIndex
   );
-  semantic_map_manager::MapAdapter mapAdapter;
+  semantic_map_manager::SemanticMapManager semantic_map_manager;
+  semantic_map_manager::MapAdapter mapAdapter(&semantic_map_manager);
   planning::EudmServer planner;
 
   // 设置队列

@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "park_data_reader/park_env.h"
-#include "park_env.h"
 
 namespace park {
 Environment::Environment(
@@ -49,9 +48,10 @@ void Environment::loadFrame(const Frame& frame) {
   }
 
   // Debug output to check if obstacles and agents are being loaded
-  std::cout << "Loaded frame " << frame.frame_token << " with "
-            << allStaticObstacles.size() << " static obstacles and "
-            << allDynamicObstacles.size() << " dynamic obstacles." << std::endl;
+  // std::cout << "Loaded frame " << frame.frame_token << " with "
+  //           << allStaticObstacles.size() << " static obstacles and "
+  //           << allDynamicObstacles.size() << " dynamic obstacles." <<
+  //           std::endl;
 }
 
 const std::unordered_map<std::string, StaticObstacle>&

@@ -57,18 +57,16 @@ void ParkSimulation::run(double cycle_time_ms) {
     auto start_time = std::chrono::steady_clock::now();
     auto it = frames.find(currentFrameToken);
     if (it == frames.end()) {
-      std::cerr << "Error: Frame token " << currentFrameToken
-                << " not found in frames map." << std::endl;
       break;
     }
     const auto& frame = it->second;
     env->loadFrame(frame);
-
+    const size_t max_queue_size = 10;  // 设置队列的最大容量
     // 输出当前帧的信息
-    std::cout << "\n=============================================\n";
-    std::cout << "Current Frame: " << frame.frame_token << std::endl;
-    std::cout << "  Timestamp: " << frame.timestamp << std::endl;
-    std::cout << "  Next Frame: " << frame.next << std::endl;
+    // std::cout << "\n=============================================\n";
+    // std::cout << "Current Frame: " << frame.frame_token << std::endl;
+    // std::cout << "  Timestamp: " << frame.timestamp << std::endl;
+    // std::cout << "  Next Frame: " << frame.next << std::endl;
 
     // // 更新绘图
     // drawingArea->setEnvironment(env);
@@ -77,9 +75,15 @@ void ParkSimulation::run(double cycle_time_ms) {
     // drawingArea->redraw();
     // Fl::check();  // 使用 FLTK 的 check 方法
 
-    // 将数据发送到建图线程
+    // 如果队列已满，删除最早的元素
     {
       std::lock_guard<std::mutex> lock(*mutex_);
+      if (envQueue_->size() >= max_queue_size) {
+        envQueue_->pop();  // 删除最早的元素
+      }
+      if (parkingMapQueue_->size() >= max_queue_size) {
+        parkingMapQueue_->pop();
+      }
       envQueue_->push(env);
       parkingMapQueue_->push(&parkingMap);
     }
@@ -92,8 +96,15 @@ void ParkSimulation::run(double cycle_time_ms) {
 
     // 移动到下一帧
     currentFrameToken = frame.next;
+    auto end_time = std::chrono::steady_clock::now();
+    std::cout << "ParkSimulation::run() cycle time: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     end_time - start_time)
+                     .count()
+              << " ms" << std::endl;
   }
 
+  std::cout << "Simulation finished." << std::endl;
   // 清理环境对象
   delete env;
 }

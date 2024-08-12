@@ -1,7 +1,7 @@
 #include <FL/fl_draw.H>
 
-#include "drawing_area.h"
-#include "park_simulation.h"
+#include "park_data_reader/drawing_area.h"
+#include "park_data_reader/park_simulation.h"
 
 namespace park {
 

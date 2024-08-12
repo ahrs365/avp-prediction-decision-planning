@@ -13,6 +13,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # 允许通过命令行或GUI选项指定构建类型（例如Debug或Release）。
 # 默认为Debug模式。
@@ -29,25 +30,44 @@ find_package(pybind11 REQUIRED)
 add_subdirectory(third_party/yaml-cpp)
 find_package(FLTK REQUIRED)
 find_package(Threads REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(OOQP REQUIRED)
 # 定义项目的包含目录路径，这些路径中的头文件可以在项目中直接包含。
+set(OOQP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/third_party/ooqp/include/ooqp)
+
 set(INCLUDE_PATH 
     ${CMAKE_SOURCE_DIR}/include 
-    ${CMAKE_SOURCE_DIR}/include/park_data_reader
-    ${CMAKE_SOURCE_DIR}/include/common
-    ${CMAKE_SOURCE_DIR}/include/eudm_planner
-    ${CMAKE_SOURCE_DIR}/include/semantic_map_manager
     ${Python3_INCLUDE_DIRS} 
     ${CMAKE_SOURCE_DIR}/third_party/matplotlib-cpp 
+    ${CMAKE_SOURCE_DIR}/third_party
     ${CMAKE_SOURCE_DIR}/third_party/yaml-cpp/include
     ${EIGEN3_INCLUDE_DIR}
     ${PYBIND11_INCLUDE_DIRS}
     ${FLTK_INCLUDE_DIR}
+    ${OpenCV_INCLUDE_DIRS}
+    ${OOQP_INCLUDE_DIRS}
 )
 
-file(GLOB_RECURSE SRC_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
-# aux_source_directory(src SRC_FILES)
+# file(GLOB_RECURSE SRC_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
+# aux_source_directory(${CMAKE_SOURCE_DIR}/src/common COMMON_SRC_FILES)
+aux_source_directory(${CMAKE_SOURCE_DIR}/src/eudm_planner EUDM_SRC_FILES)
+aux_source_directory(${CMAKE_SOURCE_DIR}/src/park_data_reader READER_SRC_FILES)
+aux_source_directory(${CMAKE_SOURCE_DIR}/src/semantic_map_manager SEMANTIC_SRC_FILES)
+aux_source_directory(${CMAKE_SOURCE_DIR}/src/vehicle_model VEHICLE_SRC_FILES)
+aux_source_directory(${CMAKE_SOURCE_DIR}/src/visualizer VIS_SRC_FILES)
+file(GLOB_RECURSE VEHICLE_SRC_FILES ${CMAKE_SOURCE_DIR}/src/vehicle_model/*.cc)
+file(GLOB_RECURSE COMMON_SRC_FILES ${CMAKE_SOURCE_DIR}/src/common/*.cc)
+
+
 # 添加一个可执行目标到项目中，并指定构建这个目标需要的源文件。
-add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/test/main2.cpp ${SRC_FILES})
+add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/test/main2.cpp 
+                                ${COMMON_SRC_FILES}
+                                ${EUDM_SRC_FILES}
+                                ${READER_SRC_FILES}
+                                ${SEMANTIC_SRC_FILES}
+                                ${VEHICLE_SRC_FILES}
+                                ${VIS_SRC_FILES}
+)
 
 # 为可执行目标设置私有包含目录，这意味着这些目录只对这个目标可见。
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_PATH})
@@ -62,6 +82,8 @@ target_link_libraries(${PROJECT_NAME}
                       yaml-cpp
                       ${FLTK_LIBRARIES}
                       Threads::Threads
+                      ${OpenCV_LIBS}
+                      ${OOQP_LIBRARIES}
 )
 
 

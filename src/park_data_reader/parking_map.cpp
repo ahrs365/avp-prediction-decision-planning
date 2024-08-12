@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "parking_map.h"
+#include "park_data_reader/parking_map.h"
 
 namespace park {
 

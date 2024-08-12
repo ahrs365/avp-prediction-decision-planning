@@ -14,11 +14,11 @@ class EudmServer {
 
   void run(double cycle_time_ms);
 
-  void setQueue(std::queue<SemanticMapManager>& smmQueue, std::mutex& mutex,
+  void setQueue(std::queue<SemanticMapManager*>& smmQueue, std::mutex& mutex,
                 std::condition_variable& cv);
 
  private:
-  std::queue<SemanticMapManager>* smmQueue_;
+  std::queue<SemanticMapManager*>* smmQueue_;
   std::mutex* mutex_;
   std::condition_variable* cv_;
 

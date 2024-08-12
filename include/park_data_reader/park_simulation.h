@@ -50,8 +50,6 @@ class ParkSimulation {
   bool staticElementsDrawn = false;
   Environment* env;
   std::string currentFrameToken;
-
-  // ParkingMap* parkingMap;
   std::queue<Environment*>* envQueue_;
   std::queue<ParkingMap*>* parkingMapQueue_;
   std::mutex* mutex_;
