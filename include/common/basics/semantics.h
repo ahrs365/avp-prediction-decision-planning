@@ -703,6 +703,32 @@ struct PolygonObstacle {
   void print() const;
 };
 
+struct Spot {
+  int id;
+  int type = 0;
+  Polygon polygon;
+
+  /**
+   * @brief Print info
+   */
+  void print() const;
+};
+
+struct ParkingSpots {
+  std::unordered_map<int, Spot> spot_polygon;
+  /**
+   * @brief Return the size of container
+   *
+   * @return int size
+   */
+  inline int size() const { return spot_polygon.size(); }
+
+  /**
+   * @brief Print info
+   */
+  void print() const;
+};
+
 struct ObstacleSet {
   std::unordered_map<int, CircleObstacle> obs_circle;
   std::unordered_map<int, PolygonObstacle> obs_polygon;

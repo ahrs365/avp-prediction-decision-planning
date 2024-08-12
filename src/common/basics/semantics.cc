@@ -389,6 +389,18 @@ void ObstacleSet::print() const {
   }
 }
 
+void ParkingSpots::print() const {
+  for (const auto &spot : spot_polygon) {
+    spot.second.print();
+  }
+}
+
+void Spot::print() const {
+  printf("id: %d\n", id);
+  polygon.print();
+  printf("\n");
+}
+
 TrafficSignal::TrafficSignal()
     : start_point_(Vec2f::Zero()),
       end_point_(Vec2f::Zero()),
@@ -511,5 +523,4 @@ ErrorType SemanticsUtils::InflateVehicleBySize(const Vehicle &vehicle_in,
   *vehicle_out = inflated_vehicle;
   return kSuccess;
 }
-
 }  // namespace common

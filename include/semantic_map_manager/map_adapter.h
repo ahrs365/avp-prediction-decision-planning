@@ -38,6 +38,7 @@ class MapAdapter {
   common::Vehicle ego_vehicle_;
   common::VehicleSet vehicle_set_;
   common::LaneNet lane_net_;
+  common::ParkingSpots spots_;
   common::ObstacleSet obstacle_set_;
   DataRenderer* p_data_renderer_;
   double time_stamp_;
@@ -50,6 +51,11 @@ class MapAdapter {
                                     common::PolygonObstacle* poly);
   void GetVehicleFromSimulationData(const DynamicObstacle& obs,
                                     common::Vehicle* vehicle);
+  void GetLanRawFromRoute(const std::vector<std::pair<double, double>>& route,
+                          common::LaneRaw* p_lane);
+  void GetParkingSpotsFromSimulationData(
+      std::unordered_map<std::string, std::vector<ParkingSpot>>& sim_spots,
+      common::ParkingSpots* parking_spots);
   void updateMap(Environment* env, ParkingMap* parkingMap);
 };
 }  // namespace semantic_map_manager

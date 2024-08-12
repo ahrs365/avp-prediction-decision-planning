@@ -33,9 +33,10 @@ class ParkingMap {
   static ParkingMap loadFromFile(const std::string& filepath);
 
   std::pair<int, int> getMapSize() const;
-  const std::unordered_map<std::string, std::vector<ParkingSpot>>&
+  //多线程，get方法不要用const &
+  const std::unordered_map<std::string, std::vector<ParkingSpot>>
   getParkingSpots() const;
-  const std::vector<std::pair<double, double>>& getAllRoutePoints() const;
+  const std::vector<std::pair<double, double>> getAllRoutePoints() const;
   void printInfo() const;
 
  private:

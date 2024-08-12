@@ -44,6 +44,7 @@ class Environment {
   const Instance* getInstance(const std::string& instance_token) const;
   const double getTimeStamp() const;
   void setTimeStamp(const double& time_stamp);
+  const ParkingMap getParkingMap() const;
 
  private:
   double time_stamp_;

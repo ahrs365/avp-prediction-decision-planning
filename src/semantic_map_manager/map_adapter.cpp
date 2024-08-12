@@ -91,6 +91,18 @@ void MapAdapter::GetSimulationDataFromStatic(Environment* env) {
     obstacle_set_.obs_polygon.insert(
         std::pair<int, common::PolygonObstacle>(obs_temp.id, obs_temp));
   }
+
+  // route
+  auto route = env->getParkingMap().getAllRoutePoints();
+  common::LaneRaw lane_raw;
+  lane_raw.id = 0;
+  GetLanRawFromRoute(route, &lane_raw);
+  lane_net_.lane_set.insert(
+      std::pair<int, common::LaneRaw>(lane_raw.id, lane_raw));
+
+  // parking spots
+  auto parking_spots = env->getParkingMap().getParkingSpots();
+  GetParkingSpotsFromSimulationData(parking_spots, &spots_);
 }
 
 void MapAdapter::GetSimulationDataFromDynamic(Environment* env) {
@@ -98,7 +110,7 @@ void MapAdapter::GetSimulationDataFromDynamic(Environment* env) {
   time_stamp_ = env->getTimeStamp();
   int id = 0;
   //这里注意不要用 const auto& obstacle =
-  //env->getCurrentDynamicObstacles(),避免线程之间冲突
+  // env->getCurrentDynamicObstacles(),避免线程之间冲突
   auto obstacles = env->getCurrentDynamicObstacles();
 
   for (const auto obs : obstacles) {
@@ -167,6 +179,51 @@ void MapAdapter::GetVehicleFromSimulationData(const DynamicObstacle& obs,
   vehicle->set_param(param);
   vehicle->set_state(state);
 }
+
+void MapAdapter::GetLanRawFromRoute(
+    const std::vector<std::pair<double, double>>& route,
+    common::LaneRaw* p_lane) {
+  p_lane->id = 0;
+  p_lane->dir = 0;
+
+  p_lane->child_id = {};
+  p_lane->father_id = {};
+  p_lane->l_lane_id = 0;
+  p_lane->l_change_avbl = false;
+  p_lane->r_lane_id = 0;
+  p_lane->r_change_avbl = false;
+  p_lane->behavior = "";
+  p_lane->length = 0;
+
+  p_lane->start_point(0) = 0;
+  p_lane->start_point(1) = 0;
+  p_lane->final_point(0) = 0;
+  p_lane->final_point(1) = 0;
+  for (const auto pt : route) {
+    p_lane->lane_points.push_back(Vec2f(pt.first, pt.second));
+  }
+}
+
+void MapAdapter::GetParkingSpotsFromSimulationData(
+    std::unordered_map<std::string, std::vector<ParkingSpot>>& sim_spots,
+    common::ParkingSpots* parking_spots) {
+  for (auto area : sim_spots) {
+    for (auto spot : area.second) {
+      common::Spot new_spot;
+      new_spot.id = spot.id;
+      new_spot.type = 0;
+      for (auto p : spot.corners) {
+        common::Point pt;
+        pt.x = p.first;
+        pt.y = p.second;
+        new_spot.polygon.points.push_back(pt);
+      }
+      parking_spots->spot_polygon.insert(
+          std::pair<int, common::Spot>(new_spot.id, new_spot));
+    }
+  }
+}
+
 void MapAdapter::updateMap(Environment* env, ParkingMap* parkingMap) {
   printf("[MapAdapter] updateMap ...\n");
   if (!get_arena_info_static_) {
@@ -176,7 +233,6 @@ void MapAdapter::updateMap(Environment* env, ParkingMap* parkingMap) {
     // 动态障碍物转换
     GetSimulationDataFromDynamic(env);
   }
-  // p_data_renderer_->Render(time_stamp_, lane_net_, vehicle_set_,
-  // obstacle_set_);
+  p_data_renderer_->Render(time_stamp_, lane_net_, vehicle_set_, obstacle_set_);
 }
 }  // namespace semantic_map_manager

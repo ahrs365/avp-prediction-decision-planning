@@ -53,12 +53,12 @@ ParkingMap ParkingMap::loadFromFile(const std::string& filepath) {
 
 std::pair<int, int> ParkingMap::getMapSize() const { return map_size; }
 
-const std::unordered_map<std::string, std::vector<ParkingSpot>>&
+const std::unordered_map<std::string, std::vector<ParkingSpot>>
 ParkingMap::getParkingSpots() const {
   return parking_spots;
 }
 
-const std::vector<std::pair<double, double>>& ParkingMap::getAllRoutePoints()
+const std::vector<std::pair<double, double>> ParkingMap::getAllRoutePoints()
     const {
   return all_route_points;
 }

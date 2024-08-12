@@ -78,4 +78,6 @@ const double Environment::getTimeStamp() const { return time_stamp_; }
 void Environment::setTimeStamp(const double& time_stamp) {
   time_stamp_ = time_stamp;
 }
+const ParkingMap park::Environment::getParkingMap() const { return parkingMap; }
+
 }  // namespace park
