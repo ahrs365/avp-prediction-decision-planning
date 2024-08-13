@@ -14,6 +14,7 @@
 
 #include "common/basics/semantics.h"
 #include "common/basics/shapes.h"
+#include "common/lane/graph.h"
 #include "common/lane/lane.h"
 #include "common/lane/lane_generator.h"
 #include "common/math/calculations.h"
@@ -40,6 +41,7 @@ class SemanticMapManager {
   SemanticMapManager(const int &id, const decimal_t surrounding_search_radius,
                      bool enable_openloop_prediction, bool use_right_hand_axis);
   ~SemanticMapManager() {}
+  void setConfig(AgentConfigInfo &config);
 
   ErrorType CheckCollisionUsingGlobalPosition(const Vec2f &p_w,
                                               bool *res) const;
@@ -168,6 +170,15 @@ class SemanticMapManager {
   inline common::SemanticLaneSet semantic_lane_set() const {
     return semantic_lane_set_;
   }
+
+  inline common::WaypointsGraph semantic_waypoint_graph() const {
+    return waypoints_graph_;
+  }
+
+  inline const common::WaypointsGraph *semantic_waypoint_graph_cptr() const {
+    const common::WaypointsGraph *ptr = &waypoints_graph_;
+    return ptr;
+  }
   inline const common::SemanticLaneSet *semantic_lane_set_cptr() const {
     const common::SemanticLaneSet *ptr = &semantic_lane_set_;
     return ptr;
@@ -282,7 +293,7 @@ class SemanticMapManager {
   decimal_t pred_step_ = 0.2;
 
   decimal_t nearest_lane_range_ = 1.5;
-  decimal_t lane_range_ = 10.0;
+  decimal_t lane_range_ = 15.0;
 
   decimal_t max_distance_to_lane_ = 2.0;
 
@@ -318,6 +329,7 @@ class SemanticMapManager {
   common::LaneNet surrounding_lane_net_;
   common::SemanticLaneSet semantic_lane_set_;
   common::SemanticBehavior ego_behavior_;
+  common::WaypointsGraph waypoints_graph_;
 
   // * open loop prediction only for collision checking for onlane mp
   std::unordered_map<int, vec_E<common::State>> openloop_pred_trajs_;

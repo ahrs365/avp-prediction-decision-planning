@@ -13,6 +13,8 @@
 
 #include "common/basics/basics.h"
 #include "common/basics/semantics.h"
+#include "common/lane/astar_graph.h"
+#include "common/lane/graph.h"
 #include "nanoflann/include/nanoflann.hpp"
 #include "semantic_map_manager/semantic_map_manager.h"
 
@@ -32,7 +34,8 @@ class DataRenderer {
 
   ErrorType Render(const double &time_stamp, const common::LaneNet &lane_net,
                    const common::VehicleSet &vehicle_set,
-                   const common::ObstacleSet &obstacle_set);
+                   const common::ObstacleSet &obstacle_set,
+                   const common::WaypointsGraph &graph);
 
  private:
   typedef nanoflann::KDTreeSingleIndexAdaptor<

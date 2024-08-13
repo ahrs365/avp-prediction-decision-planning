@@ -93,12 +93,8 @@ void MapAdapter::GetSimulationDataFromStatic(Environment* env) {
   }
 
   // route
-  auto route = env->getParkingMap().getAllRoutePoints();
-  common::LaneRaw lane_raw;
-  lane_raw.id = 0;
-  GetLanRawFromRoute(route, &lane_raw);
-  lane_net_.lane_set.insert(
-      std::pair<int, common::LaneRaw>(lane_raw.id, lane_raw));
+  auto route = env->getParkingMap().getRoutes();
+  GetGraphFromSimulationData(route, &graph_);
 
   // parking spots
   auto parking_spots = env->getParkingMap().getParkingSpots();
@@ -108,7 +104,7 @@ void MapAdapter::GetSimulationDataFromStatic(Environment* env) {
 void MapAdapter::GetSimulationDataFromDynamic(Environment* env) {
   printf("[MapAdapter] GetSimulationDataFromDynamic ...\n");
   time_stamp_ = env->getTimeStamp();
-  int id = 0;
+  int id = 1;
   //这里注意不要用 const auto& obstacle =
   // env->getCurrentDynamicObstacles(),避免线程之间冲突
   auto obstacles = env->getCurrentDynamicObstacles();
@@ -120,6 +116,15 @@ void MapAdapter::GetSimulationDataFromDynamic(Environment* env) {
     vehicle_set_.vehicles.insert(
         std::pair<int, common::Vehicle>(vehicle.id(), vehicle));
   }
+
+  //设置自车起始位置
+  common::Vehicle ego_vehicle;
+  common::State state;
+  state.vec_position = {3.07, 8};
+  state.angle = M_PI_2;
+  ego_vehicle.set_state(state);
+
+  vehicle_set_.vehicles.insert(std::pair<int, common::Vehicle>(0, ego_vehicle));
 }
 
 void MapAdapter::GetPolygonFromSimulationData(const StaticObstacle& obs,
@@ -183,9 +188,11 @@ void MapAdapter::GetVehicleFromSimulationData(const DynamicObstacle& obs,
 void MapAdapter::GetLanRawFromRoute(
     const std::vector<std::pair<double, double>>& route,
     common::LaneRaw* p_lane) {
+  if (route.empty()) {
+    return;
+  }
   p_lane->id = 0;
   p_lane->dir = 0;
-
   p_lane->child_id = {};
   p_lane->father_id = {};
   p_lane->l_lane_id = 0;
@@ -195,13 +202,125 @@ void MapAdapter::GetLanRawFromRoute(
   p_lane->behavior = "";
   p_lane->length = 0;
 
-  p_lane->start_point(0) = 0;
-  p_lane->start_point(1) = 0;
-  p_lane->final_point(0) = 0;
-  p_lane->final_point(1) = 0;
+  p_lane->start_point(0) = route.front().first;
+  p_lane->start_point(1) = route.front().second;
+  p_lane->final_point(0) = route.back().first;
+  p_lane->final_point(1) = route.back().second;
   for (const auto pt : route) {
     p_lane->lane_points.push_back(Vec2f(pt.first, pt.second));
   }
+}
+
+void MapAdapter::GetGraphFromSimulationData(
+    const std::unordered_map<std::string, Route>& routes,
+    common::WaypointsGraph* p_graph) {
+  // 为每个路线添加航路点
+  for (const auto& route : routes) {
+    p_graph->add_waypoint_list(route.second.points);
+  }
+
+  // 连接指定的航路点
+  // Connect sections
+  p_graph->connect(routes.at("C2").points[3], routes.at("R2L").points[0]);
+  p_graph->connect(routes.at("C2").points[7], routes.at("R3L").points[0]);
+
+  p_graph->connect(routes.at("C2").points[3], routes.at("R2R").points.back());
+  p_graph->connect(routes.at("C2").points[7], routes.at("R3R").points.back());
+
+  p_graph->connect(routes.at("R1L").points[0], routes.at("R1R").points.back());
+
+  // Connect corners
+  p_graph->connect(routes.at("C1").points[0], routes.at("R1C1BR").points[0]);
+  p_graph->connect(routes.at("R1C1BR").points.back(),
+                   routes.at("R1L").points.back());
+  p_graph->connect(routes.at("C1").points[2], routes.at("R2C1TR").points[0]);
+  p_graph->connect(routes.at("R2C1TR").points.back(),
+                   routes.at("R2L").points.back());
+  p_graph->connect(routes.at("C1").points[4], routes.at("R2C1BR").points[0]);
+  p_graph->connect(routes.at("R2C1BR").points.back(),
+                   routes.at("R2L").points.back());
+  p_graph->connect(routes.at("C1").points[6], routes.at("R3C1TR").points[0]);
+  p_graph->connect(routes.at("R3C1TR").points.back(),
+                   routes.at("R3L").points.back());
+  p_graph->connect(routes.at("C1").points[8], routes.at("R3C1BR").points[0]);
+  p_graph->connect(routes.at("R3C1BR").points.back(),
+                   routes.at("R3L").points.back());
+  p_graph->connect(routes.at("C1").points[10], routes.at("R4C1TR").points[0]);
+  p_graph->connect(routes.at("R4C1TR").points.back(),
+                   routes.at("R4L").points.back());
+  p_graph->connect(routes.at("C1").points[12], routes.at("R4C1BR").points[0]);
+  p_graph->connect(routes.at("R4C1BR").points.back(),
+                   routes.at("R4L").points.back());
+
+  p_graph->connect(routes.at("C2").points[0], routes.at("R1C2BL").points[0]);
+  p_graph->connect(routes.at("R1C2BL").points.back(),
+                   routes.at("R1L").points[2]);
+  p_graph->connect(routes.at("C2").points[2], routes.at("R2C2TL").points[0]);
+  p_graph->connect(routes.at("R2C2TL").points.back(),
+                   routes.at("R2L").points[0]);
+  p_graph->connect(routes.at("C2").points[4], routes.at("R2C2BL").points[0]);
+  p_graph->connect(routes.at("R2C2BL").points.back(),
+                   routes.at("R2L").points[0]);
+  p_graph->connect(routes.at("C2").points[6], routes.at("R3C2TL").points[0]);
+  p_graph->connect(routes.at("R3C2TL").points.back(),
+                   routes.at("R3L").points[0]);
+  p_graph->connect(routes.at("C2").points[8], routes.at("R3C2BL").points[0]);
+  p_graph->connect(routes.at("R3C2BL").points.back(),
+                   routes.at("R3L").points[0]);
+  p_graph->connect(routes.at("C2").points[10], routes.at("R4C2TL").points[0]);
+  p_graph->connect(routes.at("R4C2TL").points.back(),
+                   routes.at("R4L").points[0]);
+  p_graph->connect(routes.at("C2").points[12], routes.at("R4C2BL").points[0]);
+  p_graph->connect(routes.at("R4C2BL").points.back(),
+                   routes.at("R4L").points[0]);
+
+  p_graph->connect(routes.at("C2").points[0], routes.at("R1C2BR").points[0]);
+  p_graph->connect(routes.at("R1C2BR").points.back(),
+                   routes.at("R1R").points.back());
+  p_graph->connect(routes.at("C2").points[2], routes.at("R2C2TR").points[0]);
+  p_graph->connect(routes.at("R2C2TR").points.back(),
+                   routes.at("R2R").points.back());
+  p_graph->connect(routes.at("C2").points[4], routes.at("R2C2BR").points[0]);
+  p_graph->connect(routes.at("R2C2BR").points.back(),
+                   routes.at("R2R").points.back());
+  p_graph->connect(routes.at("C2").points[6], routes.at("R3C2TR").points[0]);
+  p_graph->connect(routes.at("R3C2TR").points.back(),
+                   routes.at("R3R").points.back());
+  p_graph->connect(routes.at("C2").points[8], routes.at("R3C2BR").points[0]);
+  p_graph->connect(routes.at("R3C2BR").points.back(),
+                   routes.at("R3R").points.back());
+  p_graph->connect(routes.at("C2").points[10], routes.at("R4C2TR").points[0]);
+  p_graph->connect(routes.at("R4C2TR").points.back(),
+                   routes.at("R4R").points.back());
+  p_graph->connect(routes.at("C2").points[12], routes.at("R4C2BR").points[0]);
+  p_graph->connect(routes.at("R4C2BR").points.back(),
+                   routes.at("R4R").points.back());
+
+  p_graph->connect(routes.at("R4L").points[0], routes.at("R4R").points.back());
+
+  p_graph->connect(routes.at("EXT").points[1], routes.at("EXTL").points[0]);
+  p_graph->connect(routes.at("EXT").points[1], routes.at("EXTR").points[0]);
+  p_graph->connect(routes.at("EXTL").points[0], routes.at("R1L").points.back());
+  p_graph->connect(routes.at("EXTR").points[0],
+                   routes.at("R1L").points[routes.at("R1L").points.size() - 5]);
+
+  // 打印图信息
+  // p_graph->print_graph();
+
+  // 定义起点和终点
+  common::Vertex* start = p_graph->search({80.45, 64.95});
+  common::Vertex* goal = p_graph->search({3.07, 4.5});
+
+  // 运行 A* 算法
+  common::AStarPlanner planner(start, goal);
+  common::AStarGraph result = planner.solve();
+  auto ref_path = result.compute_ref_path();
+
+  common::LaneRaw lane_raw;
+  lane_raw.id = 0;
+  GetLanRawFromRoute(ref_path, &lane_raw);
+  lane_net_.lane_set.insert(
+      std::pair<int, common::LaneRaw>(lane_raw.id, lane_raw));
 }
 
 void MapAdapter::GetParkingSpotsFromSimulationData(
@@ -229,10 +348,12 @@ void MapAdapter::updateMap(Environment* env, ParkingMap* parkingMap) {
   if (!get_arena_info_static_) {
     // 静态障碍物转换(一次就行)
     GetSimulationDataFromStatic(env);
+
   } else {
     // 动态障碍物转换
     GetSimulationDataFromDynamic(env);
+    p_data_renderer_->Render(time_stamp_, lane_net_, vehicle_set_,
+                             obstacle_set_, graph_);
   }
-  p_data_renderer_->Render(time_stamp_, lane_net_, vehicle_set_, obstacle_set_);
 }
 }  // namespace semantic_map_manager

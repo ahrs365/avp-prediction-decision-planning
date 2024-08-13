@@ -22,7 +22,14 @@ int main() {
       "./data/DJI_0012_obstacles.json", "./data/parking_map.yml", 0,
       100  // startFrameIndex, endFrameIndex
   );
+  common::GridMapMetaInfo map_info(280, 160, 0.5);
+  semantic_map_manager::AgentConfigInfo config;
+  config.obstacle_map_meta_info = map_info;
+  config.surrounding_search_radius = 150;
+
   semantic_map_manager::SemanticMapManager semantic_map_manager;
+  semantic_map_manager.setConfig(config);
+
   semantic_map_manager::MapAdapter mapAdapter(&semantic_map_manager);
   planning::EudmServer planner;
 

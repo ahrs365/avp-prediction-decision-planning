@@ -1,3 +1,4 @@
+
 #include "semantic_map_manager/semantic_map_manager.h"
 
 namespace semantic_map_manager {
@@ -26,6 +27,10 @@ SemanticMapManager::SemanticMapManager(
   use_right_hand_axis_ = use_right_hand_axis;
   is_simple_lane_structure_ = true;
   printf("[SemanticMapManager] Initialization finished\n");
+}
+
+void SemanticMapManager::setConfig(AgentConfigInfo &config) {
+  agent_config_info_ = config;
 }
 
 ErrorType SemanticMapManager::UpdateSemanticMap(

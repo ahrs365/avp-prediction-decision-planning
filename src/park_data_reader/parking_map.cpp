@@ -5,7 +5,23 @@
 #include "park_data_reader/parking_map.h"
 
 namespace park {
+// 线性插值函数
+std::vector<std::pair<double, double>> ParkingMap::LinSpace(
+    const std::pair<double, double>& start,
+    const std::pair<double, double>& end, int num) {
+  std::vector<std::pair<double, double>> points;
+  if (num == 1) {
+    points.push_back(start);
+  } else {
+    double step_x = (end.first - start.first) / (num - 1);
+    double step_y = (end.second - start.second) / (num - 1);
 
+    for (int i = 0; i < num; ++i) {
+      points.emplace_back(start.first + i * step_x, start.second + i * step_y);
+    }
+  }
+  return points;
+}
 ParkingMap ParkingMap::loadFromFile(const std::string& filepath) {
   YAML::Node config = YAML::LoadFile(filepath);
   ParkingMap parkingMap;
@@ -38,11 +54,24 @@ ParkingMap ParkingMap::loadFromFile(const std::string& filepath) {
   // 读取航路点
   for (const auto& waypoint : config["WAYPOINTS"]) {
     Route route;
-    route.points.push_back({waypoint.second["bounds"][0][0].as<double>(),
-                            waypoint.second["bounds"][0][1].as<double>()});
-    route.points.push_back({waypoint.second["bounds"][1][0].as<double>(),
-                            waypoint.second["bounds"][1][1].as<double>()});
+    auto bounds = waypoint.second["bounds"];
+    auto nums = waypoint.second["nums"].as<int>();
+
+    std::pair<double, double> start(bounds[0][0].as<double>(),
+                                    bounds[0][1].as<double>());
+    std::pair<double, double> end(bounds[1][0].as<double>(),
+                                  bounds[1][1].as<double>());
+
+    route.points = LinSpace(start, end, nums);
+
     parkingMap.routes[waypoint.first.as<std::string>()] = route;
+
+    // // Optional: 打印生成的航路点信息
+    // std::cout << "Route: " << waypoint.first.as<std::string>() << " points:
+    // "; for (const auto& point : route.points) {
+    //   std::cout << "(" << point.first << ", " << point.second << ") ";
+    // }
+    // std::cout << std::endl;
   }
 
   parkingMap.generateParkingSpots();
@@ -63,6 +92,9 @@ const std::vector<std::pair<double, double>> ParkingMap::getAllRoutePoints()
   return all_route_points;
 }
 
+const std::unordered_map<std::string, Route> ParkingMap::getRoutes() const {
+  return routes;
+}
 void ParkingMap::generateParkingSpots() {
   int id = 1;
   for (const auto& area : parking_areas) {

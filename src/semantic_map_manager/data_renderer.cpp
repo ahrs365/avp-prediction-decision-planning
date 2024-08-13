@@ -10,11 +10,9 @@ namespace semantic_map_manager {
 DataRenderer::DataRenderer(SemanticMapManager *smm_ptr)
     : p_semantic_map_manager_(smm_ptr) {
   ego_id_ = p_semantic_map_manager_->ego_id();
-  obstacle_map_info_ =
-      p_semantic_map_manager_->agent_config_info().obstacle_map_meta_info;
+  obstacle_map_info_ = smm_ptr->agent_config_info().obstacle_map_meta_info;
   surrounding_search_radius_ =
-      p_semantic_map_manager_->agent_config_info().surrounding_search_radius;
-
+      smm_ptr->agent_config_info().surrounding_search_radius;
   std::array<int, 2> map_size = {
       {obstacle_map_info_.height, obstacle_map_info_.width}};
   std::array<decimal_t, 2> map_resl = {
@@ -30,7 +28,8 @@ DataRenderer::DataRenderer(SemanticMapManager *smm_ptr)
 ErrorType DataRenderer::Render(const double &time_stamp,
                                const common::LaneNet &lane_net,
                                const common::VehicleSet &vehicle_set,
-                               const common::ObstacleSet &obstacle_set) {
+                               const common::ObstacleSet &obstacle_set,
+                               const common::WaypointsGraph &graph) {
   time_stamp_ = time_stamp;
   GetEgoVehicle(vehicle_set);  // ~ Must update ego vehicle first
   GetObstacleMap(obstacle_set);
@@ -136,6 +135,9 @@ ErrorType DataRenderer::GetObstacleMap(
   std::array<decimal_t, 2> origin = {{x_r, y_r}};
   p_obstacle_grid_->set_origin(origin);
 
+  // 这里的 p_obstacle_grid_->get_data_ptr() 返回了一个指向
+  // p_obstacle_grid_内部数据的指针。 这个指针被传递给了 OpenCV 的 cv::Mat，使得
+  // grid_mat 直接与 p_obstacle_grid_ 的数据绑定。
   cv::Mat grid_mat =
       cv::Mat(obstacle_map_info_.height, obstacle_map_info_.width,
               CV_MAKETYPE(cv::DataType<ObstacleMapType>::type, 1),

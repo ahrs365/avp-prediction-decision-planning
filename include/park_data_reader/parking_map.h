@@ -30,6 +30,9 @@ struct ParkingArea {
 
 class ParkingMap {
  public:
+  static std::vector<std::pair<double, double>> LinSpace(
+      const std::pair<double, double>& start,
+      const std::pair<double, double>& end, int num);
   static ParkingMap loadFromFile(const std::string& filepath);
 
   std::pair<int, int> getMapSize() const;
@@ -37,6 +40,7 @@ class ParkingMap {
   const std::unordered_map<std::string, std::vector<ParkingSpot>>
   getParkingSpots() const;
   const std::vector<std::pair<double, double>> getAllRoutePoints() const;
+  const std::unordered_map<std::string, Route> getRoutes() const;
   void printInfo() const;
 
  private:

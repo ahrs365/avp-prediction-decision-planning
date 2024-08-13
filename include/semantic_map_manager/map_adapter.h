@@ -10,10 +10,10 @@
 
 #include "common/basics/basics.h"
 #include "common/basics/semantics.h"
+#include "common/lane/graph.h"
 #include "park_data_reader/park_simulation.h"
 #include "semantic_map_manager/data_renderer.h"
 #include "semantic_map_manager/semantic_map_manager.h"
-
 using namespace park;
 
 namespace semantic_map_manager {
@@ -39,6 +39,7 @@ class MapAdapter {
   common::VehicleSet vehicle_set_;
   common::LaneNet lane_net_;
   common::ParkingSpots spots_;
+  common::WaypointsGraph graph_;
   common::ObstacleSet obstacle_set_;
   DataRenderer* p_data_renderer_;
   double time_stamp_;
@@ -53,6 +54,9 @@ class MapAdapter {
                                     common::Vehicle* vehicle);
   void GetLanRawFromRoute(const std::vector<std::pair<double, double>>& route,
                           common::LaneRaw* p_lane);
+  void GetGraphFromSimulationData(
+      const std::unordered_map<std::string, Route>& routes,
+      common::WaypointsGraph* p_graph);
   void GetParkingSpotsFromSimulationData(
       std::unordered_map<std::string, std::vector<ParkingSpot>>& sim_spots,
       common::ParkingSpots* parking_spots);
