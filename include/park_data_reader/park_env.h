@@ -34,7 +34,7 @@ class Environment {
               const std::unordered_map<std::string, Frame>& frames,
               const std::unordered_map<std::string, Instance>& instances,
               const std::unordered_map<std::string, Agent>& agents,
-              const ParkingMap& parkingMap);
+              const ParkingMap& parking_map);
 
   void loadFrame(const Frame& frame);
   const std::unordered_map<std::string, StaticObstacle>&
@@ -45,6 +45,7 @@ class Environment {
   const double getTimeStamp() const;
   void setTimeStamp(const double& time_stamp);
   const ParkingMap getParkingMap() const;
+  ParkingMap* getParkingMapPtr();
 
  private:
   double time_stamp_;
@@ -52,7 +53,7 @@ class Environment {
   std::unordered_map<std::string, Instance> allInstances;
   std::unordered_map<std::string, Agent> allAgents;
 
-  ParkingMap parkingMap;
+  ParkingMap parking_map_;
 
   std::unordered_map<std::string, StaticObstacle> allStaticObstacles;
   std::unordered_map<std::string, DynamicObstacle> allDynamicObstacles;

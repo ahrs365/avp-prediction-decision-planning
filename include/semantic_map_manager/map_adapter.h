@@ -21,19 +21,9 @@ class MapAdapter {
  public:
   MapAdapter(SemanticMapManager* ptr_smm);
   ~MapAdapter();
-  void run(double cycle_time_ms);
-  void setQueues(std::queue<Environment*>& envQueue,
-                 std::queue<ParkingMap*>& parkingMapQueue,
-                 std::queue<SemanticMapManager*>& smmQueue, std::mutex& mutex,
-                 std::condition_variable& cv);
+  void run(Environment* env);
 
  private:
-  std::queue<Environment*>* envQueue_;
-  std::queue<ParkingMap*>* parkingMapQueue_;
-  std::queue<SemanticMapManager*>* smmQueue_;
-  std::mutex* mutex_;
-  std::condition_variable* cv_;
-
   common::Vehicle ego_vehicle_;
   common::VehicleSet vehicle_set_;
   common::LaneNet lane_net_;
@@ -53,9 +43,8 @@ class MapAdapter {
                                     common::Vehicle* vehicle);
   void GetLanRawFromRoute(const std::vector<std::pair<double, double>>& route,
                           common::LaneRaw* p_lane);
-  void GetGraphFromSimulationData(
-      const std::unordered_map<std::string, Route>& routes,
-      common::WaypointsGraph* p_graph);
+  common::WaypointsGraph GetGraphFromSimulationData(
+      const std::unordered_map<std::string, Route>& routes);
   void GetParkingSpotsFromSimulationData(
       std::unordered_map<std::string, std::vector<ParkingSpot>>& sim_spots,
       common::ParkingSpots* parking_spots);

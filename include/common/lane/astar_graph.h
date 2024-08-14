@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <iterator>
+#include <memory>  // 包含智能指针库
 #include <queue>
 #include <set>
 #include <vector>
@@ -12,12 +13,12 @@ namespace common {
 // AStarGraph 类：用于存储 A* 结果路径的图
 class AStarGraph : public WaypointsGraph {
  public:
-  AStarGraph(const std::vector<Edge*>& path) {
+  AStarGraph(const std::vector<std::shared_ptr<Edge>>& path) {
     edges = path;
 
     if (!path.empty()) {
       vertices.push_back(path.front()->v1);
-      for (auto* e : path) {
+      for (const auto& e : path) {
         vertices.push_back(e->v2);
       }
     }
@@ -26,7 +27,7 @@ class AStarGraph : public WaypointsGraph {
   // 计算路径的总成本
   double path_cost() const {
     double cost = 0;
-    for (const auto* e : edges) {
+    for (const auto& e : edges) {
       cost += e->cost;
     }
     return cost;
@@ -41,15 +42,10 @@ class AStarGraph : public WaypointsGraph {
   // 计算参考路径（可根据实际需求实现）
   std::vector<std::pair<double, double>> compute_ref_path(
       double offset = 0.0) const {
-    std::vector<double> axs;
-    std::vector<double> ays;
     std::vector<std::pair<double, double>> route;
     // 收集 A* 解中的 x, y
-    for (const auto* v : vertices) {
+    for (const auto& v : vertices) {
       route.push_back({v->coords.first, v->coords.second});
-      //   std::cout << "(" << v->coords.first << ", " << v->coords.second <<
-      //   ")"
-      //             << std::endl;
     }
     return route;
 
@@ -60,10 +56,12 @@ class AStarGraph : public WaypointsGraph {
 // AStarPlanner 类：使用 A* 算法在图上规划最短路径
 class AStarPlanner {
  public:
-  AStarPlanner(Vertex* v_start, Vertex* v_goal)
+  AStarPlanner(const std::shared_ptr<Vertex>& v_start,
+               const std::shared_ptr<Vertex>& v_goal)
       : v_start(v_start), v_goal(v_goal), counter(0) {
-    fringe.emplace(0, counter++,
-                   std::make_tuple(v_start, std::vector<Edge*>{}, 0.0));
+    fringe.emplace(
+        0, counter++,
+        std::make_tuple(v_start, std::vector<std::shared_ptr<Edge>>{}, 0.0));
   }
 
   AStarGraph solve() {
@@ -71,8 +69,8 @@ class AStarPlanner {
       auto current = fringe.top();
       fringe.pop();
 
-      Vertex* v = std::get<0>(std::get<2>(current));
-      std::vector<Edge*> path = std::get<1>(std::get<2>(current));
+      auto v = std::get<0>(std::get<2>(current));
+      auto path = std::get<1>(std::get<2>(current));
       double cost = std::get<2>(std::get<2>(current));
 
       if (v == v_goal) {
@@ -83,8 +81,8 @@ class AStarPlanner {
         closed.insert(v);
 
         for (size_t i = 0; i < v->children.size(); ++i) {
-          Vertex* child = v->children[i];
-          Edge* edge = v->edges[i];
+          auto child = v->children[i];
+          auto edge = v->edges[i];
 
           double new_cost = cost + edge->cost;
           double a_star_cost = new_cost + child->dist(v_goal);
@@ -102,15 +100,19 @@ class AStarPlanner {
   }
 
  private:
-  Vertex* v_start;
-  Vertex* v_goal;
+  std::shared_ptr<Vertex> v_start;
+  std::shared_ptr<Vertex> v_goal;
   std::priority_queue<
-      std::tuple<double, int, std::tuple<Vertex*, std::vector<Edge*>, double>>,
-      std::vector<std::tuple<double, int,
-                             std::tuple<Vertex*, std::vector<Edge*>, double>>>,
+      std::tuple<double, int,
+                 std::tuple<std::shared_ptr<Vertex>,
+                            std::vector<std::shared_ptr<Edge>>, double>>,
+      std::vector<
+          std::tuple<double, int,
+                     std::tuple<std::shared_ptr<Vertex>,
+                                std::vector<std::shared_ptr<Edge>>, double>>>,
       std::greater<>>
-      fringe;                // 优先队列用于 A* 搜索
-  std::set<Vertex*> closed;  // 已访问的节点
+      fringe;                                // 优先队列用于 A* 搜索
+  std::set<std::shared_ptr<Vertex>> closed;  // 已访问的节点
   int counter;  // 计数器用于防止优先队列中具有相同成本的节点混淆
 };
 

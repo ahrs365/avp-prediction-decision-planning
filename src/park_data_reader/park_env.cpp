@@ -8,11 +8,11 @@ Environment::Environment(
     const std::unordered_map<std::string, Frame>& frames,
     const std::unordered_map<std::string, Instance>& instances,
     const std::unordered_map<std::string, Agent>& agents,
-    const ParkingMap& parkingMap)
+    const ParkingMap& parking_map)
     : allFrames(frames),
       allInstances(instances),
       allAgents(agents),
-      parkingMap(parkingMap) {
+      parking_map_(parking_map) {
   // 在构造函数中加载所有障碍物，因为它们是静态的
   allStaticObstacles.clear();
   for (const auto& obstacle : obstacles) {
@@ -78,6 +78,12 @@ const double Environment::getTimeStamp() const { return time_stamp_; }
 void Environment::setTimeStamp(const double& time_stamp) {
   time_stamp_ = time_stamp;
 }
-const ParkingMap park::Environment::getParkingMap() const { return parkingMap; }
+const ParkingMap park::Environment::getParkingMap() const {
+  return parking_map_;
+}
 
+ParkingMap* Environment::getParkingMapPtr() {
+  ParkingMap* ptr = &parking_map_;
+  return ptr;
+}
 }  // namespace park

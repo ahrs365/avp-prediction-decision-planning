@@ -307,10 +307,10 @@ class SemanticMapManager {
   decimal_t pred_time_ = 5.0;
   decimal_t pred_step_ = 0.2;
 
-  decimal_t nearest_lane_range_ = 1.5;
-  decimal_t lane_range_ = 15.0;
+  decimal_t nearest_lane_range_ = 200;  // 1.5;
+  decimal_t lane_range_ = 200.0;
 
-  decimal_t max_distance_to_lane_ = 2.0;
+  decimal_t max_distance_to_lane_ = 200;  // 2.0;
 
   bool has_fast_lut_ = false;
   std::unordered_map<int, common::Lane> local_lanes_;

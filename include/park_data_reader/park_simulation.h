@@ -21,7 +21,7 @@ class ParkSimulation {
                  const std::string& obstaclesFile, const std::string& mapFile,
                  int startFrameIndex, int endFrameIndex);
 
-  void run(double cycle_time_ms);
+  void run();
   void setQueues(std::queue<Environment*>& envQueue,
                  std::queue<ParkingMap*>& parkingMapQueue, std::mutex& mutex,
                  std::condition_variable& cv);
