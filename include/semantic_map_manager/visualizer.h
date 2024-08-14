@@ -3,26 +3,31 @@
 #include <assert.h>
 
 #include <iostream>
+#include <mutex>
+#include <opencv2/opencv.hpp>
 #include <vector>
 
 #include "common/basics/basics.h"
 #include "common/basics/semantics.h"
+#include "common/lane/graph.h"
 #include "common/state/state.h"
 #include "common/visualization/common_visualization_util.h"
-#include "semantic_map_manager/semantic_map_manager.h"
 
 namespace semantic_map_manager {
 class Visualizer {
  public:
-  Visualizer(int node_id);
-  Visualizer();
+  // 获取单例实例
+  static Visualizer &GetInstance() {
+    static Visualizer instance;
+    return instance;
+  }
+  // 禁止复制构造和赋值操作
+  Visualizer(const Visualizer &) = delete;
+  Visualizer &operator=(const Visualizer &) = delete;
 
-  ~Visualizer();
-
-  void VisualizeDataWithStamp(const double &stamp,
-                              const SemanticMapManager &smm);
   void VisualizeGraph(const double &stamp,
                       const common::WaypointsGraph &way_graph);
+  void VisualizeSpots(const double &stamp, const common::ParkingSpots &spots);
   void VisualizeEgoVehicle(const double &stamp, const common::Vehicle &vehicle);
   void VisualizeSurroundingLaneNet(const double &stamp,
                                    const common::LaneNet &lane_net,
@@ -35,8 +40,29 @@ class Visualizer {
   void VisualizeObstacleMap(const double &stamp,
                             const common::GridMapND<uint8_t, 2> &obstacle_map);
 
+  void VisualizeGridMap(const cv::Mat &grid_map);
+
  private:
   int node_id_;
+
+ private:
+  cv::Mat canvas_;    // 画布，用于绘制车辆、障碍物等
+  std::mutex mutex_;  // 互斥锁，保证线程安全
+
+  // 构造函数
+  Visualizer() {
+    // 初始化画布大小和颜色
+    canvas_ = cv::Mat::zeros(cv::Size(800, 600), CV_8UC3);
+
+    // 创建并显示窗口
+    cv::namedWindow("Vehicle Visualization", cv::WINDOW_AUTOSIZE);
+  }
+
+  // 析构函数
+  ~Visualizer() {
+    // 关闭窗口，释放资源
+    cv::destroyWindow("Vehicle Visualization");
+  }
 
 };  // class Visualizer
 }  // namespace semantic_map_manager

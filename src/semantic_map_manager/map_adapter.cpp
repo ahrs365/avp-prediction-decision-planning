@@ -33,6 +33,8 @@ void MapAdapter::run(double cycle_time_ms) {
       if (parkingMapQueue_->size() > 1) {
         parkingMapQueue_->pop();
       }
+      std::cout << "MapAdapter::run() get data from queue " << envQueue_->size()
+                << " " << parkingMapQueue_->size() << std::endl;
     }
 
     // 生成语义地图
@@ -353,7 +355,7 @@ void MapAdapter::updateMap(Environment* env, ParkingMap* parkingMap) {
     // 动态障碍物转换
     GetSimulationDataFromDynamic(env);
     p_data_renderer_->Render(time_stamp_, lane_net_, vehicle_set_,
-                             obstacle_set_, graph_);
+                             obstacle_set_, graph_, spots_);
   }
 }
 }  // namespace semantic_map_manager

@@ -29,7 +29,8 @@ ErrorType DataRenderer::Render(const double &time_stamp,
                                const common::LaneNet &lane_net,
                                const common::VehicleSet &vehicle_set,
                                const common::ObstacleSet &obstacle_set,
-                               const common::WaypointsGraph &graph) {
+                               const common::WaypointsGraph &graph,
+                               const common::ParkingSpots &spots) {
   time_stamp_ = time_stamp;
   GetEgoVehicle(vehicle_set);  // ~ Must update ego vehicle first
   GetObstacleMap(obstacle_set);
@@ -48,9 +49,11 @@ ErrorType DataRenderer::Render(const double &time_stamp,
 
   p_semantic_map_manager_->UpdateSemanticMap(
       time_stamp_, ego_vehicle_, whole_lane_net_, surrounding_lane_net_,
-      *p_obstacle_grid_, obs_grids_, surrounding_vehicles_);
+      *p_obstacle_grid_, obs_grids_, surrounding_vehicles_, graph, spots);
 
-  return kSuccess;
+  //可视化
+  semantic_map_manager::Visualizer::GetInstance().VisualizeGraph(time_stamp,
+                                                                 graph);
 }
 
 ErrorType DataRenderer::InjectObservationNoise() {
@@ -133,6 +136,7 @@ ErrorType DataRenderer::GetObstacleMap(
   // Use gridmap nd
   p_obstacle_grid_->fill_data(GridMap2D::UNKNOWN);
   std::array<decimal_t, 2> origin = {{x_r, y_r}};
+
   p_obstacle_grid_->set_origin(origin);
 
   // 这里的 p_obstacle_grid_->get_data_ptr() 返回了一个指向

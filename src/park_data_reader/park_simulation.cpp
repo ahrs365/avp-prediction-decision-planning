@@ -60,6 +60,7 @@ void ParkSimulation::run(double cycle_time_ms) {
       break;
     }
     const auto& frame = it->second;
+    //这里loadFrame可能和map_adapter里的env->getCurrentDynamicObstacles()资源冲突，需要加锁
     env->loadFrame(frame);
     const size_t max_queue_size = 10;  // 设置队列的最大容量
     // 输出当前帧的信息
@@ -78,6 +79,7 @@ void ParkSimulation::run(double cycle_time_ms) {
     // 如果队列已满，删除最早的元素
     {
       std::lock_guard<std::mutex> lock(*mutex_);
+      // env->loadFrame(frame);  //挪到这里就安全了，。。。还是不行
       if (envQueue_->size() >= max_queue_size) {
         envQueue_->pop();  // 删除最早的元素
       }

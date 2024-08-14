@@ -23,6 +23,7 @@
 #include "motion_predictor/onlane_fs_predictor.h"
 #include "semantic_map_manager/config_loader.h"
 #include "semantic_map_manager/traffic_signal_manager.h"
+#include "semantic_map_manager/visualizer.h"
 #include "vehicle_model/idm_model.h"
 
 namespace semantic_map_manager {
@@ -71,7 +72,9 @@ class SemanticMapManager {
       const common::LaneNet &surrounding_lane_net,
       const common::GridMapND<ObstacleMapType, 2> &obstacle_map,
       const std::set<std::array<decimal_t, 2>> &obstacle_grids,
-      const common::VehicleSet &surrounding_vehicles);
+      const common::VehicleSet &surrounding_vehicles,
+      const common::WaypointsGraph &waypoints_graph,
+      const common::ParkingSpots &spots);
 
   ErrorType GetNearestLaneIdUsingState(const Vec3f &state,
                                        const std::vector<int> &navi_path,
@@ -175,6 +178,10 @@ class SemanticMapManager {
     return waypoints_graph_;
   }
 
+  inline common::ParkingSpots parking_spots() const { return parking_spots_; }
+
+  inline common::ParkingSpots *parking_spots_ptr() { return &parking_spots_; }
+
   inline const common::WaypointsGraph *semantic_waypoint_graph_cptr() const {
     const common::WaypointsGraph *ptr = &waypoints_graph_;
     return ptr;
@@ -227,6 +234,14 @@ class SemanticMapManager {
   inline void set_ego_vehicle(const common::Vehicle &in) { ego_vehicle_ = in; }
   inline void set_surrounding_vehicles(const common::VehicleSet &in) {
     surrounding_vehicles_ = in;
+  }
+
+  inline void set_waypoints_graph(const common::WaypointsGraph &in) {
+    waypoints_graph_ = in;
+  }
+
+  inline void set_parking_spots(const common::ParkingSpots &spots) {
+    parking_spots_ = spots;
   }
   inline void set_whole_lane_net(const common::LaneNet &in) {
     whole_lane_net_ = in;
@@ -330,6 +345,7 @@ class SemanticMapManager {
   common::SemanticLaneSet semantic_lane_set_;
   common::SemanticBehavior ego_behavior_;
   common::WaypointsGraph waypoints_graph_;
+  common::ParkingSpots parking_spots_;
 
   // * open loop prediction only for collision checking for onlane mp
   std::unordered_map<int, vec_E<common::State>> openloop_pred_trajs_;

@@ -40,11 +40,15 @@ ErrorType SemanticMapManager::UpdateSemanticMap(
     const common::LaneNet &surrounding_lane_net,
     const common::GridMapND<ObstacleMapType, 2> &obstacle_map,
     const std::set<std::array<decimal_t, 2>> &obstacle_grids,
-    const common::VehicleSet &surrounding_vehicles) {
+    const common::VehicleSet &surrounding_vehicles,
+    const common::WaypointsGraph &waypoints_graph,
+    const common::ParkingSpots &spots) {
   printf("[SemanticMapManager] UpdateSemanticMap...\n");
 
   TicToc timer;
   time_stamp_ = time_stamp;
+  set_parking_spots(spots);
+  set_waypoints_graph(waypoints_graph);
   set_ego_vehicle(ego_vehicle);
   set_whole_lane_net(whole_lane_net);
   set_surrounding_lane_net(surrounding_lane_net);
