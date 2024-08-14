@@ -22,7 +22,6 @@ class MapAdapter {
   MapAdapter(SemanticMapManager* ptr_smm);
   ~MapAdapter();
   void run(double cycle_time_ms);
-
   void setQueues(std::queue<Environment*>& envQueue,
                  std::queue<ParkingMap*>& parkingMapQueue,
                  std::queue<SemanticMapManager*>& smmQueue, std::mutex& mutex,

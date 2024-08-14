@@ -27,6 +27,7 @@
 
 namespace semantic_map_manager {
 
+// visualizer与semantic_map_manager.h互相包含了，导致编译报错，这里加上前置声明。
 class SemanticMapManager {
  public:
   using ObstacleMapType = uint8_t;
@@ -35,8 +36,7 @@ class SemanticMapManager {
   using Lane = common::Lane;
   using LateralBehavior = common::LateralBehavior;
   using SemanticLane = common::SemanticLane;
-
-  SemanticMapManager() {}
+  SemanticMapManager();
   SemanticMapManager(const int &id, const std::string &agent_config_path);
   SemanticMapManager(const int &id, const decimal_t surrounding_search_radius,
                      bool enable_openloop_prediction, bool use_right_hand_axis);
@@ -337,7 +337,6 @@ class SemanticMapManager {
   TicToc global_timer_;
   TrafficSignalManager traffic_singal_manager_;
   ConfigLoader *p_config_loader_;
-
   common::RssChecker rss_checker_;
 
   // * For highway-like lane structure only

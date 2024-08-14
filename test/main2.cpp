@@ -1,6 +1,3 @@
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-
 #include <thread>
 
 #include "eudm_planner/eudm_server.h"

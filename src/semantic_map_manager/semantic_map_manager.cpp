@@ -3,6 +3,7 @@
 
 namespace semantic_map_manager {
 
+SemanticMapManager::SemanticMapManager() {}
 SemanticMapManager::SemanticMapManager(const int &id,
                                        const std::string &agent_config_path)
     : ego_id_(id), agent_config_path_(agent_config_path) {
