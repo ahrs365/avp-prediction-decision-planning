@@ -11,7 +11,7 @@ int main() {
       "./data/DJI_0012_scene.json", "./data/DJI_0012_agents.json",
       "./data/DJI_0012_frames.json", "./data/DJI_0012_instances.json",
       "./data/DJI_0012_obstacles.json", "./data/parking_map.yml", 0,
-      100  // startFrameIndex, endFrameIndex
+      800  // startFrameIndex, endFrameIndex
   );
 
   simulation.run();

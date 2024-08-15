@@ -57,14 +57,15 @@ void MapAdapter::GetSimulationDataFromDynamic(Environment* env) {
   printf("[MapAdapter] GetSimulationDataFromDynamic ...\n");
   vehicle_set_.vehicles.clear();
   time_stamp_ = env->getTimeStamp();
-  int id = 1;
+
   //这里注意不要用 const auto& obstacle =
   // env->getCurrentDynamicObstacles(),避免线程之间冲突
   auto obstacles = env->getCurrentDynamicObstacles();
-
+  auto id_record = env->GetAgentTokenToId();
   for (const auto obs : obstacles) {
     common::Vehicle vehicle;
-    vehicle.set_id(id++);
+    int id = id_record[obs.first];
+    vehicle.set_id(id);
     GetVehicleFromSimulationData(obs.second, &vehicle);
     vehicle_set_.vehicles.insert(
         std::pair<int, common::Vehicle>(vehicle.id(), vehicle));

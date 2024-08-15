@@ -67,7 +67,7 @@ class DataRenderer {
   common::PointVecForKdTree vehicle_set_pts_;
   std::shared_ptr<KdTreeFor2dPointVec> kdtree_vehicle_;
 
-  int ego_id_ = 39;
+  int ego_id_ = 108;
 
   int ray_casting_num_ = 1440;
 

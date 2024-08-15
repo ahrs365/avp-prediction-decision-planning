@@ -82,6 +82,13 @@ const ParkingMap park::Environment::getParkingMap() const {
   return parking_map_;
 }
 
+const std::map<std::string, int> Environment::GetAgentTokenToId() const {
+  return agent_token_to_id_;
+}
+void Environment::setAgentTokenToId(
+    const std::map<std::string, int>& agent_token_to_id) {
+  agent_token_to_id_ = agent_token_to_id;
+}
 ParkingMap* Environment::getParkingMapPtr() {
   ParkingMap* ptr = &parking_map_;
   return ptr;

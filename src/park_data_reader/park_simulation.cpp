@@ -36,6 +36,12 @@ void ParkSimulation::loadData() {
   obstacles = Obstacle::loadFromFile(obstaclesFile);
   parkingMap = ParkingMap::loadFromFile(mapFile);
   env = new Environment(obstacles, frames, instances, agents, parkingMap);
+  std::map<std::string, int> agent_token_to_id;
+  int id = 0;
+  for (auto it : agents) {
+    agent_token_to_id[it.first] = ++id;
+  }
+  env->setAgentTokenToId(agent_token_to_id);
 }
 
 void ParkSimulation::findStartFrame() {

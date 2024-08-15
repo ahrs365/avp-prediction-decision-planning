@@ -45,6 +45,8 @@ class Environment {
   const double getTimeStamp() const;
   void setTimeStamp(const double& time_stamp);
   const ParkingMap getParkingMap() const;
+  const std::map<std::string, int> GetAgentTokenToId() const;
+  void setAgentTokenToId(const std::map<std::string, int>& agent_token_to_id);
   ParkingMap* getParkingMapPtr();
 
  private:
@@ -57,6 +59,7 @@ class Environment {
 
   std::unordered_map<std::string, StaticObstacle> allStaticObstacles;
   std::unordered_map<std::string, DynamicObstacle> allDynamicObstacles;
+  std::map<std::string, int> agent_token_to_id_;
 };
 
 }  // namespace park
