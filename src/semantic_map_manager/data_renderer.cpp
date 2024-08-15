@@ -52,8 +52,9 @@ ErrorType DataRenderer::Render(const double &time_stamp,
       *p_obstacle_grid_, obs_grids_, surrounding_vehicles_, graph, spots);
 
   //可视化
-  semantic_map_manager::Visualizer::GetInstance().VisualizeGraph(time_stamp,
-                                                                 graph);
+  semantic_map_manager::Visualizer::GetInstance().VisualizeData(
+      time_stamp, graph, spots, ego_vehicle_, whole_lane_net_, obstacle_set,
+      surrounding_vehicles_, *p_obstacle_grid_, obs_grids_);
 }
 
 ErrorType DataRenderer::InjectObservationNoise() {
@@ -132,6 +133,8 @@ ErrorType DataRenderer::GetObstacleMap(
   // Aligning to global coordinate to improve consistency
   decimal_t x_r = std::round(x);
   decimal_t y_r = std::round(y);
+  x_r = 0;
+  y_r = 0;
 
   // Use gridmap nd
   p_obstacle_grid_->fill_data(GridMap2D::UNKNOWN);

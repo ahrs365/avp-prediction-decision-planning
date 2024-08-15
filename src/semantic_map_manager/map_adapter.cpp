@@ -55,6 +55,7 @@ void MapAdapter::GetSimulationDataFromStatic(Environment* env) {
 
 void MapAdapter::GetSimulationDataFromDynamic(Environment* env) {
   printf("[MapAdapter] GetSimulationDataFromDynamic ...\n");
+  vehicle_set_.vehicles.clear();
   time_stamp_ = env->getTimeStamp();
   int id = 1;
   //这里注意不要用 const auto& obstacle =
@@ -72,7 +73,7 @@ void MapAdapter::GetSimulationDataFromDynamic(Environment* env) {
   //设置自车起始位置
   common::Vehicle ego_vehicle;
   common::State state;
-  state.vec_position = {3.07, 8};
+  state.vec_position = {70, 40};
   state.angle = M_PI_2;
   ego_vehicle.set_state(state);
 

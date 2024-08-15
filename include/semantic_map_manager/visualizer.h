@@ -25,6 +25,16 @@ class Visualizer {
   Visualizer(const Visualizer &) = delete;
   Visualizer &operator=(const Visualizer &) = delete;
 
+  void VisualizeData(const double &stamp,
+                     const common::WaypointsGraph &way_graph,
+                     const common::ParkingSpots &spots,
+                     const common::Vehicle &vehicle,
+                     const common::LaneNet &lane_net,
+                     const common::ObstacleSet &obstacle_set,
+                     const common::VehicleSet &vehicle_set,
+                     const common::GridMapND<uint8_t, 2> &obstacle_map,
+                     const std::set<std::array<decimal_t, 2>> &grid_map);
+
   void VisualizeGraph(const double &stamp,
                       const common::WaypointsGraph &way_graph);
   void VisualizeSpots(const double &stamp, const common::ParkingSpots &spots);
@@ -40,10 +50,19 @@ class Visualizer {
   void VisualizeObstacleMap(const double &stamp,
                             const common::GridMapND<uint8_t, 2> &obstacle_map);
 
-  void VisualizeGridMap(const cv::Mat &grid_map);
+  void VisualizeStaticObstacle(const double &stamp,
+                               const common::ObstacleSet &obstacle_set);
+
+  void VisualizeGridMap(const std::set<std::array<decimal_t, 2>> &grid_map);
 
  private:
   int node_id_;
+  int width_ = 1600;
+  int height_ = 1200;
+  double map_width_ = 140;
+  double map_height_ = 80;
+  double scale_;
+  cv::Point2d offset_;
 
  private:
   cv::Mat canvas_;    // 画布，用于绘制车辆、障碍物等
@@ -52,7 +71,7 @@ class Visualizer {
   // 构造函数
   Visualizer() {
     // 初始化画布大小和颜色
-    canvas_ = cv::Mat::zeros(cv::Size(800, 600), CV_8UC3);
+    canvas_ = cv::Mat::zeros(cv::Size(width_, height_), CV_8UC3);
 
     // 创建并显示窗口
     cv::namedWindow("Vehicle Visualization", cv::WINDOW_AUTOSIZE);
