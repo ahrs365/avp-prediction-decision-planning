@@ -53,7 +53,9 @@ void ParkSimulation::findStartFrame() {
 void ParkSimulation::run() {
   loadData();
   findStartFrame();
-  common::GridMapMetaInfo map_info(280, 160, 0.5);
+  // common::GridMapMetaInfo map_info(280, 160, 0.5);
+  common::GridMapMetaInfo map_info(300, 300, 0.5);
+
   semantic_map_manager::AgentConfigInfo config;
   config.obstacle_map_meta_info = map_info;
   config.surrounding_search_radius = 150;

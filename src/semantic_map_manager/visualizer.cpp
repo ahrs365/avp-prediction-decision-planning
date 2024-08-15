@@ -35,7 +35,7 @@ void Visualizer::VisualizeData(
   VisualizeObstacleMap(stamp, obstacle_map);
   VisualizeGridMap(grid_map);
   cv::imshow("Vehicle Visualization", canvas_);
-  cv::waitKey(100);
+  cv::waitKey(1);
 }
 void Visualizer::VisualizeGraph(const double& stamp,
 
@@ -100,7 +100,64 @@ void Visualizer::VisualizeSpots(const double& stamp,
 }
 void Visualizer::VisualizeEgoVehicle(const double& stamp,
 
-                                     const common::Vehicle& vehicle) {}
+                                     const common::Vehicle& vehicle) {
+  // 获取车辆的 OBB (Oriented BoundingBox)
+  common::OrientedBoundingBox2D obb = vehicle.RetOrientedBoundingBox();
+
+  // 获取车辆的四个顶点
+  vec_E<Vec2f> vertices;
+  common::SemanticsUtils::GetVehicleVertices(vehicle.param(), vehicle.state(),
+                                             &vertices);
+
+  // 将顶点转换为 cv::Point2i，并按照 scale 和 offset 进行缩放和平移
+  std::vector<cv::Point> polygon_points;
+  for (const auto& vertex : vertices) {
+    polygon_points.push_back(
+        cv::Point(static_cast<int>(vertex.x() * scale_ + offset_.x),
+                  static_cast<int>(vertex.y() * scale_ + offset_.y)));
+  }
+
+  // 创建一个与画布相同大小的临时图层
+  cv::Mat overlay;
+  canvas_.copyTo(overlay);
+
+  // 在临时图层上填充车辆轮廓 (半透明蓝色)
+  cv::fillPoly(overlay, std::vector<std::vector<cv::Point>>{polygon_points},
+               cv::Scalar(0, 0, 255, 100));  // 100 表示透明度
+
+  // 将临时图层与原始画布混合，生成半透明效果
+  double alpha = 0.4;  // 控制透明度
+  cv::addWeighted(overlay, alpha, canvas_, 1 - alpha, 0, canvas_);
+
+  // 绘制车辆轮廓 (多边形)
+  cv::polylines(canvas_, polygon_points, true, cv::Scalar(0, 0, 255),
+                2);  // 绿色线表示车辆
+
+  // 绘制速度箭头
+  const auto& state = vehicle.state();
+  double velocity = state.velocity;  // 获取车辆的速度大小
+  double angle = state.angle;        // 获取车辆的朝向
+
+  // // 判断车辆是否在倒车 (根据速度和角度关系)
+  // if (state.is_reverse) {  // 假设 `state.is_reverse` 标识车辆是否在倒车
+  //   velocity = -velocity;  // 如果在倒车，反向调整速度的箭头方向
+  // }
+
+  // 计算速度箭头的起点和终点
+  cv::Point arrow_start(static_cast<int>(obb.x * scale_ + offset_.x),
+                        static_cast<int>(obb.y * scale_ + offset_.y));
+  cv::Point arrow_end =
+      arrow_start + cv::Point(static_cast<int>(velocity * cos(angle) * scale_),
+                              static_cast<int>(velocity * sin(angle) * scale_));
+
+  // 绘制速度箭头
+  cv::arrowedLine(canvas_, arrow_start, arrow_end, cv::Scalar(0, 0, 255), 2, 8,
+                  0, 0.3);  // 红色箭头表示速度
+
+  // 显示车辆ID或其他信息
+  cv::putText(canvas_, "ego", arrow_start, cv::FONT_HERSHEY_SIMPLEX, 0.5,
+              cv::Scalar(0, 0, 255), 1);
+}
 void Visualizer::VisualizeSurroundingLaneNet(
     const double& stamp, const common::LaneNet& lane_net,
     const std::vector<int>& deleted_lane_ids) {}
@@ -203,7 +260,7 @@ void Visualizer::VisualizeObstacleMap(
 
   // 显示放大的地图
   cv::imshow("Obstacle Map", enlarged_map_image);
-  cv::waitKey(100);
+  cv::waitKey(1);
 }
 
 void Visualizer::VisualizeStaticObstacle(
@@ -244,6 +301,9 @@ void Visualizer::VisualizeStaticObstacle(
 // 可视化 GridMap 的方法
 void Visualizer::VisualizeGridMap(
     const std::set<std::array<decimal_t, 2>>& grid_map) {
+  if (grid_map.empty()) {
+    return;
+  }
   // 计算地图尺寸 (假设根据坐标范围决定地图尺寸)
   decimal_t min_x = std::numeric_limits<decimal_t>::max();
   decimal_t max_x = std::numeric_limits<decimal_t>::lowest();
@@ -276,13 +336,13 @@ void Visualizer::VisualizeGridMap(
 
   // 放大地图
   cv::Mat enlarged_grid_image;
-  int scale_factor = 4;  // 放大倍数，可根据需要调整
+  int scale_factor = 10;  // 放大倍数，可根据需要调整
   cv::resize(grid_image, enlarged_grid_image, cv::Size(), scale_factor,
              scale_factor, cv::INTER_NEAREST);
 
   // 显示放大的地图
   cv::imshow("Grid Map", enlarged_grid_image);
-  cv::waitKey(100);
+  cv::waitKey(1);
 }
 
 }  // namespace semantic_map_manager

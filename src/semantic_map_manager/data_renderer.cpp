@@ -133,8 +133,6 @@ ErrorType DataRenderer::GetObstacleMap(
   // Aligning to global coordinate to improve consistency
   decimal_t x_r = std::round(x);
   decimal_t y_r = std::round(y);
-  x_r = 0;
-  y_r = 0;
 
   // Use gridmap nd
   p_obstacle_grid_->fill_data(GridMap2D::UNKNOWN);
@@ -172,6 +170,10 @@ ErrorType DataRenderer::GetObstacleMap(
     polys.push_back(poly);
   }
   cv::fillPoly(grid_mat, polys, cv::Scalar(GridMap2D::OCCUPIED));
+
+  // // 显示地图
+  // cv::imshow("Obstacle Map", grid_mat);
+  // cv::waitKey(1000);
 
   return kSuccess;
 }

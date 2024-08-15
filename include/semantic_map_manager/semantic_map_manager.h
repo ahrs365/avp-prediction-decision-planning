@@ -320,7 +320,7 @@ class SemanticMapManager {
   decimal_t local_lane_length_forward_ = 250.0;
   decimal_t local_lane_length_backward_ = 150.0;
 
-  int ego_id_ = 0;
+  int ego_id_ = 39;  //设置自车id
   std::string agent_config_path_;
   AgentConfigInfo agent_config_info_;
   bool use_right_hand_axis_ = true;

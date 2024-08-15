@@ -73,8 +73,8 @@ void MapAdapter::GetSimulationDataFromDynamic(Environment* env) {
   //设置自车起始位置
   common::Vehicle ego_vehicle;
   common::State state;
-  state.vec_position = {70, 40};
-  state.angle = M_PI_2;
+  state.vec_position = {0, 0};
+  state.angle = 0;
   ego_vehicle.set_state(state);
 
   vehicle_set_.vehicles.insert(std::pair<int, common::Vehicle>(0, ego_vehicle));
