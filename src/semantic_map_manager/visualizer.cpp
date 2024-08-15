@@ -160,7 +160,56 @@ void Visualizer::VisualizeEgoVehicle(const double& stamp,
 }
 void Visualizer::VisualizeSurroundingLaneNet(
     const double& stamp, const common::LaneNet& lane_net,
-    const std::vector<int>& deleted_lane_ids) {}
+    const std::vector<int>& deleted_lane_ids) {
+  // 遍历所有的车道
+  for (const auto& lane_pair : lane_net.lane_set) {
+    const auto& lane = lane_pair.second;
+
+    // 如果该车道 ID 在删除列表中，则跳过该车道
+    if (std::find(deleted_lane_ids.begin(), deleted_lane_ids.end(), lane.id) !=
+        deleted_lane_ids.end()) {
+      continue;
+    }
+
+    // 获取车道的路径点
+    const vec_E<Vec2f>& lane_points = lane.lane_points;
+
+    // 遍历路径点，并绘制路径线
+    for (size_t i = 0; i < lane_points.size() - 1; ++i) {
+      // 获取路径点的坐标，并按照 scale_ 和 offset_ 进行缩放和平移
+      cv::Point2d pt1(lane_points[i].x() * scale_ + offset_.x,
+                      lane_points[i].y() * scale_ + offset_.y);
+      cv::Point2d pt2(lane_points[i + 1].x() * scale_ + offset_.x,
+                      lane_points[i + 1].y() * scale_ + offset_.y);
+
+      // 绘制车道路径线
+      cv::line(canvas_, pt1, pt2, cv::Scalar(0, 255, 255),
+               2);  // 黄色线表示车道路径
+    }
+
+    // 标记路径的起点和终点
+    if (!lane_points.empty()) {
+      // 起点
+      cv::Point2d start_point(lane_points.front().x() * scale_ + offset_.x,
+                              lane_points.front().y() * scale_ + offset_.y);
+      cv::circle(canvas_, start_point, 5, cv::Scalar(0, 255, 0),
+                 -1);  // 绿色圆点表示路径起点
+      cv::putText(canvas_, "Start", start_point + cv::Point2d(10, 10),
+                  cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0),
+                  1);  // 标记"起点"
+
+      // 终点
+      cv::Point2d end_point(lane_points.back().x() * scale_ + offset_.x,
+                            lane_points.back().y() * scale_ + offset_.y);
+      cv::circle(canvas_, end_point, 5, cv::Scalar(0, 0, 255),
+                 -1);  // 红色圆点表示路径终点
+      cv::putText(canvas_, "End", end_point + cv::Point2d(10, 10),
+                  cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255),
+                  1);  // 标记"终点"
+    }
+  }
+}
+
 void Visualizer::VisualizeSurroundingVehicles(
     const double& stamp, const common::VehicleSet& vehicle_set,
     const std::vector<int>& nearby_ids) {
