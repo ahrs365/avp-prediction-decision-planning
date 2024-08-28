@@ -94,8 +94,8 @@ void Visualizer::VisualizeSpots(const double& stamp,
     center.x /= polygon_points.size();
     center.y /= polygon_points.size();
 
-    cv::putText(canvas_, std::to_string(spot.id), center,
-                cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 0), 1);
+    // cv::putText(canvas_, std::to_string(spot.id), center,
+    //             cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 0), 1);
   }
 }
 void Visualizer::VisualizeEgoVehicle(const double& stamp,
@@ -216,7 +216,7 @@ void Visualizer::VisualizeSurroundingVehicles(
   for (const auto& vehicle_pair : vehicle_set.vehicles) {
     const auto& vehicle = vehicle_pair.second;
 
-    // 获取车辆的 OBB (Oriented BoundingBox)
+    // 获取车辆的 OBB (Oriented Bounding Box)
     common::OrientedBoundingBox2D obb = vehicle.RetOrientedBoundingBox();
 
     // 获取车辆的四个顶点
@@ -232,31 +232,42 @@ void Visualizer::VisualizeSurroundingVehicles(
                     static_cast<int>(vertex.y() * scale_ + offset_.y)));
     }
 
+    // 根据车辆类型选择颜色
+    cv::Scalar fill_color, outline_color, arrow_color;
+    if (vehicle.subclass() == "Pedestrian") {
+      fill_color = cv::Scalar(0, 0, 0);     // 绿色填充表示行人
+      outline_color = cv::Scalar(0, 0, 0);  // 绿色轮廓
+      arrow_color = cv::Scalar(0, 0, 0);    // 绿色箭头表示速度
+    } else if (vehicle.subclass() == "Car") {
+      fill_color = cv::Scalar(0, 165, 255);     // 红色填充表示车辆
+      outline_color = cv::Scalar(0, 165, 255);  // 红色轮廓
+      arrow_color = cv::Scalar(0, 165, 255);    // 红色箭头表示速度
+    } else {
+      fill_color = cv::Scalar(255, 0, 0);     // 默认蓝色填充
+      outline_color = cv::Scalar(255, 0, 0);  // 蓝色轮廓
+      arrow_color = cv::Scalar(255, 0, 0);    // 蓝色箭头表示速度
+    }
+
     // 创建一个与画布相同大小的临时图层
     cv::Mat overlay;
     canvas_.copyTo(overlay);
 
-    // 在临时图层上填充车辆轮廓 (半透明蓝色)
+    // 在临时图层上填充车辆轮廓 (半透明填充)
     cv::fillPoly(overlay, std::vector<std::vector<cv::Point>>{polygon_points},
-                 cv::Scalar(255, 0, 0, 100));  // 100 表示透明度
+                 fill_color);
 
     // 将临时图层与原始画布混合，生成半透明效果
     double alpha = 0.4;  // 控制透明度
     cv::addWeighted(overlay, alpha, canvas_, 1 - alpha, 0, canvas_);
 
     // 绘制车辆轮廓 (多边形)
-    cv::polylines(canvas_, polygon_points, true, cv::Scalar(255, 0, 0),
-                  2);  // 绿色线表示车辆
+    cv::polylines(canvas_, polygon_points, true, outline_color,
+                  2);  // 绘制轮廓线
 
     // 绘制速度箭头
     const auto& state = vehicle.state();
-    double velocity = state.velocity;  // 获取车辆的速度大小
-    double angle = state.angle;        // 获取车辆的朝向
-
-    // // 判断车辆是否在倒车 (根据速度和角度关系)
-    // if (state.is_reverse) {  // 假设 `state.is_reverse` 标识车辆是否在倒车
-    //   velocity = -velocity;  // 如果在倒车，反向调整速度的箭头方向
-    // }
+    double velocity = state.velocity * 2;  // 获取车辆的速度大小
+    double angle = state.angle;            // 获取车辆的朝向
 
     // 计算速度箭头的起点和终点
     cv::Point arrow_start(static_cast<int>(obb.x * scale_ + offset_.x),
@@ -267,8 +278,7 @@ void Visualizer::VisualizeSurroundingVehicles(
                   static_cast<int>(velocity * sin(angle) * scale_));
 
     // 绘制速度箭头
-    cv::arrowedLine(canvas_, arrow_start, arrow_end, cv::Scalar(255, 0, 0), 2,
-                    8, 0, 0.3);  // 红色箭头表示速度
+    cv::arrowedLine(canvas_, arrow_start, arrow_end, arrow_color, 2, 8, 0, 0.3);
 
     // 显示车辆ID或其他信息
     cv::putText(canvas_, std::to_string(vehicle.id()), arrow_start,
