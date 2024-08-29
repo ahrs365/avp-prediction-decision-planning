@@ -6,6 +6,9 @@
 
 [![Star History Chart](https://api.star-history.com/svg?repos=ahrs365/avp-prediction-decision-planning&type=Date)](https://star-history.com/#ahrs365/avp-prediction-decision-planning&Date)
 
+关注公众号，获取更多机器人和自动驾驶信息
+<img width="245" alt="image" src="https://github.com/user-attachments/assets/3d8ca8a0-96e6-4c3c-9d26-93c3b2d362b4">
+
 
 # 1.数据集
 https://sites.google.com/berkeley.edu/dlp-dataset
