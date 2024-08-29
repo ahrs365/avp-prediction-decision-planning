@@ -32,6 +32,9 @@
 
 ![alt text](doc/pic/data.png)
 
+![GitHub stars](https://img.shields.io/github/stars/ahrs365/avp-prediction-decision-planning?style=social)
+
+
 -------------------------------------------------------------
 分割线，下边是数据集相关的介绍
 
