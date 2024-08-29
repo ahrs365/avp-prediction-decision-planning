@@ -37,6 +37,10 @@
 
 [![Star History Chart](https://api.star-history.com/svg?repos=ahrs365/avp-prediction-decision-planning&type=Date)](https://star-history.com/#ahrs365/avp-prediction-decision-planning&Date)
 
+更多细节，请关注公众号：
+
+<img width="245" alt="image" src="https://github.com/user-attachments/assets/34896837-c2b5-4bad-be94-634c18c9f4ef">
+
 -------------------------------------------------------------
 分割线，下边是数据集相关的介绍
 
