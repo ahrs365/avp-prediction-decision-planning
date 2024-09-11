@@ -17,6 +17,7 @@
 #include "common/lane/graph.h"
 #include "nanoflann/include/nanoflann.hpp"
 #include "semantic_map_manager/semantic_map_manager.h"
+#include "semantic_map_manager/visualizer.h"
 
 namespace semantic_map_manager {
 class DataRenderer {
@@ -35,7 +36,8 @@ class DataRenderer {
   ErrorType Render(const double &time_stamp, const common::LaneNet &lane_net,
                    const common::VehicleSet &vehicle_set,
                    const common::ObstacleSet &obstacle_set,
-                   const common::WaypointsGraph &graph);
+                   const common::WaypointsGraph &graph,
+                   const common::ParkingSpots &spots);
 
  private:
   typedef nanoflann::KDTreeSingleIndexAdaptor<
@@ -65,7 +67,7 @@ class DataRenderer {
   common::PointVecForKdTree vehicle_set_pts_;
   std::shared_ptr<KdTreeFor2dPointVec> kdtree_vehicle_;
 
-  int ego_id_ = 0;
+  int ego_id_ = 55;
 
   int ray_casting_num_ = 1440;
 

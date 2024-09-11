@@ -1,13 +1,53 @@
 # avp-prediction-decision-planning
 
-请前往single_thread分支查看最新代码。
+
+# 简介：
+![alt text](doc/pic/4.png)
+
+停车场代客泊车开源项目，加载开源的泊车数据集，进行数据回放。构建仿真环境，包括拓扑路线，停车位，行人，车辆，静止障碍物，可以在仿真环境中开发自己的预测，决策，规划模块。
+
+# 开发计划：
+
+第一阶段：数据读取和回放(已完成)
+
+第二阶段：数据转换与障碍物地图构建(已完成)
+
+第三阶段：意图预测和轨迹预测(todo)
+
+第四阶段：POMDP决策(todo)
+
+第五阶段：轨迹规划(todo)
+
+# 感谢：
+
+数据集参考自：https://sites.google.com/berkeley.edu/dlp-dataset
+
+语义地图参考自：https://github.com/HKUST-Aerial-Robotics/EPSILON
+
+# 其他：
+1.有一些废弃代码还没来得及删除，后续将会删除。
+
+2.依赖的库：先看cmakelist吧，有空了整理个说明
+
+3.data文件夹太大了，请自行去原始数据集链接下载,把.json文件和.yml放在data文件夹下即可
+
+![alt text](doc/pic/data.png)
+
+![GitHub stars](https://img.shields.io/github/stars/ahrs365/avp-prediction-decision-planning?style=social)
 
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=ahrs365/avp-prediction-decision-planning&type=Date)](https://star-history.com/#ahrs365/avp-prediction-decision-planning&Date)
 
-关注公众号，获取更多机器人和自动驾驶信息
-<img width="245" alt="image" src="https://github.com/user-attachments/assets/3d8ca8a0-96e6-4c3c-9d26-93c3b2d362b4">
+
+更多细节，请关注公众号：
+
+<img width="245" alt="image" src="https://github.com/user-attachments/assets/34896837-c2b5-4bad-be94-634c18c9f4ef">
+
+-------------------------------------------------------------
+分割线，下边是数据集相关的介绍
+
+-------------------------------------------------------------
 
 
 # 1.数据集

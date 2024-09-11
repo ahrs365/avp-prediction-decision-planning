@@ -3,10 +3,11 @@
 #include <chrono>  // 包含 <chrono> 头文件
 #include <iostream>
 #include <limits>
-#include <thread>  // 包含 <thread> 头文件
 
+#include "eudm_planner/eudm_server.h"
 #include "matplotlibcpp.h"
 #include "park_data_reader/park_simulation.h"
+#include "semantic_map_manager/map_adapter.h"
 namespace plt = matplotlibcpp;
 namespace park {
 
@@ -35,6 +36,12 @@ void ParkSimulation::loadData() {
   obstacles = Obstacle::loadFromFile(obstaclesFile);
   parkingMap = ParkingMap::loadFromFile(mapFile);
   env = new Environment(obstacles, frames, instances, agents, parkingMap);
+  std::map<std::string, int> agent_token_to_id;
+  int id = 0;
+  for (auto it : agents) {
+    agent_token_to_id[it.first] = ++id;
+  }
+  env->setAgentTokenToId(agent_token_to_id);
 }
 
 void ParkSimulation::findStartFrame() {
@@ -49,9 +56,22 @@ void ParkSimulation::findStartFrame() {
   }
 }
 
-void ParkSimulation::run(double cycle_time_ms) {
+void ParkSimulation::run() {
   loadData();
   findStartFrame();
+  // common::GridMapMetaInfo map_info(280, 160, 0.5);
+  common::GridMapMetaInfo map_info(300, 300, 0.5);
+
+  semantic_map_manager::AgentConfigInfo config;
+  config.obstacle_map_meta_info = map_info;
+  config.surrounding_search_radius = 150;
+
+  semantic_map_manager::SemanticMapManager semantic_map_manager;
+  semantic_map_manager.setConfig(config);
+
+  semantic_map_manager::MapAdapter mapAdapter(&semantic_map_manager);
+
+  planning::EudmServer planner;
 
   while (!currentFrameToken.empty()) {
     auto start_time = std::chrono::steady_clock::now();
@@ -61,38 +81,10 @@ void ParkSimulation::run(double cycle_time_ms) {
     }
     const auto& frame = it->second;
     env->loadFrame(frame);
-    const size_t max_queue_size = 10;  // 设置队列的最大容量
     // 输出当前帧的信息
-    // std::cout << "\n=============================================\n";
-    // std::cout << "Current Frame: " << frame.frame_token << std::endl;
-    // std::cout << "  Timestamp: " << frame.timestamp << std::endl;
-    // std::cout << "  Next Frame: " << frame.next << std::endl;
-
-    // // 更新绘图
-    // drawingArea->setEnvironment(env);
-    // drawingArea->setParkingMap(parkingMap);
-    // drawingArea->setCurrentFrame(frame);
-    // drawingArea->redraw();
-    // Fl::check();  // 使用 FLTK 的 check 方法
-
-    // 如果队列已满，删除最早的元素
-    {
-      std::lock_guard<std::mutex> lock(*mutex_);
-      if (envQueue_->size() >= max_queue_size) {
-        envQueue_->pop();  // 删除最早的元素
-      }
-      if (parkingMapQueue_->size() >= max_queue_size) {
-        parkingMapQueue_->pop();
-      }
-      envQueue_->push(env);
-      parkingMapQueue_->push(&parkingMap);
-    }
-    cv_->notify_all();
-
-    // 控制回放线程周期
-    std::this_thread::sleep_until(
-        start_time +
-        std::chrono::milliseconds(static_cast<int>(cycle_time_ms)));
+    std::cout << "\n=============================================\n";
+    std::cout << "Current Frame: " << frame.frame_token
+              << " ,Timestamp: " << frame.timestamp << std::endl;
 
     // 移动到下一帧
     currentFrameToken = frame.next;
@@ -102,6 +94,9 @@ void ParkSimulation::run(double cycle_time_ms) {
                      end_time - start_time)
                      .count()
               << " ms" << std::endl;
+
+    mapAdapter.run(env);
+    planner.run(&semantic_map_manager);
   }
 
   std::cout << "Simulation finished." << std::endl;
